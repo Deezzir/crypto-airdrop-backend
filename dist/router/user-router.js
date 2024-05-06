@@ -1,8 +1,17 @@
 import { Router } from "express";
 import userController from "../controllers/user-controller.js";
 const userRouter = Router();
-userRouter.post('/getUsersByType', userController.getUsersByType);
-userRouter.post('/getUserById', userController.getUserById);
-userRouter.post('/updateUser', userController.updateUser);
-userRouter.post('/createUser', userController.createUser);
+// {
+//     user: {
+//         wallet: walletToSend,
+//         twitter: twitterToSend,
+//         twitterLink: twitterLinkToSend,
+//         telegram: telegramToSend,
+//     }
+// }
+userRouter.post("/addUpdateUser", userController.addUpdateUser);
+// {
+//         wallet: walletToSend,
+// }
+userRouter.post("/checkUserByWallet", userController.checkUserByWallet);
 export default userRouter;

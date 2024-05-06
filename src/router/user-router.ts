@@ -11,7 +11,7 @@ const userRouter = Router();
 //         telegram: telegramToSend,
 //     }
 // }
-userRouter.post("/addUpdateUser", userController.addUser);
+userRouter.post("/addUpdateUser", userController.addUpdateUser);
 
 // {
 //         wallet: walletToSend,

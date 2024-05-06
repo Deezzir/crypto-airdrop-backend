@@ -6,9 +6,12 @@ class UserController {
   //TODO ???
   //UPDATE USER IF REGISTERED AND TWITTER LINK IS DIFFERENT
 
-  async addUser(req, res, next) {
+  async addUpdateUser(req, res, next) {
     try {
       const { user } = req.body;
+
+      console.log("user = ", user);
+      return res.json({});
 
       if (!user) {
         return null; //next(AuthError.BadRequest)
@@ -28,6 +31,9 @@ class UserController {
   async checkUserByWallet(req, res, next) {
     try {
       const { wallet } = req.body;
+
+      console.log("wallet = ", wallet);
+      return res.json({});
 
       const user = await userService.getUsersByWallet(wallet);
 
