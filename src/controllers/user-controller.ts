@@ -3,6 +3,9 @@ import Mapper from "../mappers/mapper.js";
 import userService from "../services/user-service.js";
 
 class UserController {
+  //TODO ???
+  //UPDATE USER IF REGISTERED AND TWITTER LINK IS DIFFERENT
+
   async addUser(req, res, next) {
     try {
       const { user } = req.body;
