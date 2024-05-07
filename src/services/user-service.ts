@@ -1,8 +1,9 @@
+import TelegramBot, { Message, ChatMember } from "node-telegram-bot-api";
 import UserModel from "../models/user.js";
 
 class UserService {
-  async getUsersByWallet(wallet) {
-    const users = await UserModel.find({ wallet });
+  async getUserByWallet(wallet) {
+    const users = await UserModel.findOne({ wallet });
 
     return users;
   }
@@ -11,6 +12,21 @@ class UserService {
     const newUser = await new UserModel(user).save();
 
     return newUser;
+  }
+
+  async updateUser(user) {
+    return await UserModel.updateOne({ wallet: user.wallet }, user);
+  }
+
+  async verifyTG(telegram) {
+    const user = await UserModel.findOne({ telegram });
+
+    if (!user || user.telegramVerified) {
+      return;
+    }
+
+    user.telegramVerified = true;
+    user.save();
   }
 }
 

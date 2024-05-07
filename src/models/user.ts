@@ -1,44 +1,38 @@
-import mongoose, { Schema, model } from 'mongoose'
-
+import mongoose, { Schema, model } from "mongoose";
 
 const userSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    surname: {
-        type: String,
-        required: true
-    },
-    isActivated: {
-        type: Boolean,
-        required: true,
-        default: false
-    },
-    activationLink: {
-        type: String
-    },
-    userType:{
-        type: String,
-        enum: ['USER','COACH','ADMIN'],
-        require: true,
-        default: 'USER'
-    },
-    birthday: {
-        type: Number,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        require: true
-    },
-})
+  wallet: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  twitter: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  twitterLink: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  telegram: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  telegramVerified: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  isMoneySent: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
 
-const UserModel = mongoose.model('User', userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;

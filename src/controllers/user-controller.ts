@@ -1,27 +1,35 @@
-import UserDTO from "../dtos/user-dto.js";
-import Mapper from "../mappers/mapper.js";
 import userService from "../services/user-service.js";
+import TelegramBot from "node-telegram-bot-api";
 
 class UserController {
-  //TODO ???
-  //UPDATE USER IF REGISTERED AND TWITTER LINK IS DIFFERENT
-
   async addUpdateUser(req, res, next) {
     try {
       const { user } = req.body;
-
       console.log("user = ", user);
-      return res.json({});
+      const userExists = await userService.getUserByWallet(user.wallet);
+
+      if (userExists) {
+        console.log("userExists = ", userExists);
+        const updatedUser = await userService.updateUser(user);
+
+        return res.json({
+          isCreated: false,
+          isUpdated: true,
+        });
+      }
 
       if (!user) {
-        return null; //next(AuthError.BadRequest)
+        return res.json({
+          isCreated: false,
+          isUpdated: false,
+        });
       }
 
       const newUser = await userService.createUser(user);
 
       return res.json({
-        id: newUser._id,
-        name: newUser.name,
+        isCreated: true,
+        isUpdated: false,
       });
     } catch (e) {
       next(e);
@@ -31,22 +39,26 @@ class UserController {
   async checkUserByWallet(req, res, next) {
     try {
       const { wallet } = req.body;
-
       console.log("wallet = ", wallet);
-      return res.json({});
 
-      const user = await userService.getUsersByWallet(wallet);
-
-      if (!user) {
-        // NO USER FOUND
+      if (!wallet) {
+        return null;
       }
 
-      //ADD VALIDATION CHECK FOR:
-      // TG
+      const user = await userService.getUserByWallet(wallet);
+
+      if (!user) {
+        return null;
+      }
+
+      //TELEGRAM
+      const telegramVerified = user.telegramVerified;
+
       // TWITTER
       // TWITTER POST
+      // WALLET
       return res.json({
-        validated: true,
+        isTwitter: true,
       });
     } catch (e) {
       next(e);
