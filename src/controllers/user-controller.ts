@@ -1,5 +1,5 @@
 import userService from "../services/user-service.js";
-import TelegramBot from "node-telegram-bot-api";
+import { PublicKey } from "@solana/web3.js";
 
 class UserController {
   async addUpdateUser(req, res, next) {
@@ -53,12 +53,20 @@ class UserController {
 
       //TELEGRAM
       const telegramVerified = user.telegramVerified;
+      let walletVerified = false;
+      try {
+        await new PublicKey(wallet);
+        walletVerified = true;
+      } catch (e) {}
 
       // TWITTER
       // TWITTER POST
       // WALLET
       return res.json({
+        isTelegram: telegramVerified,
         isTwitter: true,
+        isTwitterPost: true,
+        isWallet: walletVerified,
       });
     } catch (e) {
       next(e);
