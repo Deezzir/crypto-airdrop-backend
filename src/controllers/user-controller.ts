@@ -53,6 +53,8 @@ class UserController {
 
       //TELEGRAM
       const telegramVerified = user.telegramVerified;
+
+      // WALLET
       let walletVerified = false;
       try {
         await new PublicKey(wallet);
@@ -61,7 +63,10 @@ class UserController {
 
       // TWITTER
       // TWITTER POST
-      // WALLET
+
+      //TODO REGEX ON CREATE/UPDATE
+      //TODO TWITTER
+
       return res.json({
         isTelegram: telegramVerified,
         isTwitter: true,
