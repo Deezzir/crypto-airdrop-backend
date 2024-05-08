@@ -12,12 +12,24 @@ const userRouter = Router();
 //     }
 // }
 userRouter.post("/addUpdateUser", userController.addUpdateUser);
+// {
+//     isCreated: true,
+//     isUpdated: false,
+// }
 
 // {
 //         wallet: walletToSend,
 // }
 userRouter.post("/checkUserByWallet", userController.checkUserByWallet);
+// {
+//     isTelegram: telegramVerified,
+//     isTwitter: true,
+//     isTwitterPost: true,
+//     isWallet: walletVerified,
+// }
 
+// nothing
 userRouter.get("/getUsersRegistered", userController.getUsersRegistered);
+//{ numberOfUsers: number }
 
 export default userRouter;
