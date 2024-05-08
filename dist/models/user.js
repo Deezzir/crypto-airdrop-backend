@@ -27,17 +27,14 @@ const userSchema = new Schema({
     },
     isMoneySent: {
         type: Boolean,
-        required: true,
         default: false,
     },
     numberOfTokens: {
         type: Number,
-        required: true,
         default: null,
     },
     transactionLink: {
         type: String,
-        required: true,
         default: null,
     },
 });

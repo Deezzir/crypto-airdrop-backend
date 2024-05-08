@@ -5,11 +5,27 @@ class UserController {
   async addUpdateUser(req, res, next) {
     try {
       const { user } = req.body;
-      console.log("user = ", user);
+
+      const numberOfUsers = await userService.getNumberOfUsers();
+
+      //DO NOT REGISTER/UPDATE USER IF LIMIT IS REACHED
+      if (numberOfUsers >= 1000) {
+        return res.json({
+          errorMsg: "Max number of users is reached.",
+        });
+      }
+      //DO NOT REGISTER/UPDATE PEOPLE AFTER DEADLINE
+      const currentDate = new Date();
+      const milliseconds = currentDate.getMilliseconds();
+      if (milliseconds > Number(process.env.DEADLINE_TIME)) {
+        return res.json({
+          errorMsg: "You cannot register after deadline.",
+        });
+      }
+
       const userExists = await userService.getUserByWallet(user.wallet);
 
       if (userExists) {
-        console.log("userExists = ", userExists);
         const updatedUser = await userService.updateUser(user);
 
         return res.json({
@@ -50,7 +66,6 @@ class UserController {
   async checkUserByWallet(req, res, next) {
     try {
       const { wallet } = req.body;
-      console.log("wallet = ", wallet);
 
       if (!wallet) {
         return null;
