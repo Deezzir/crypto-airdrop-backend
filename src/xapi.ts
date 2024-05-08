@@ -13,6 +13,7 @@ if (!user_data || user_data.errors) {
     console.error(`User ${user_data} not found`);
     process.exit(1);
 }
+console.log(`User to follow ${user_data.data.username} found`);
 const TO_FOLLOW_USER_ID = user_data.data.id;
 
 export { TO_FOLLOW_USER_ID, xClient };
