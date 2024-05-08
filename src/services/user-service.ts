@@ -14,6 +14,10 @@ class UserService {
     return newUser;
   }
 
+  async getNumberOfUsers() {
+    return await UserModel.countDocuments();
+  }
+
   async updateUser(user) {
     return await UserModel.updateOne({ wallet: user.wallet }, user);
   }

@@ -30,6 +30,16 @@ const userSchema = new Schema({
         required: true,
         default: false,
     },
+    numberOfTokens: {
+        type: Number,
+        required: true,
+        default: null,
+    },
+    transactionLink: {
+        type: String,
+        required: true,
+        default: null,
+    },
 });
 const UserModel = mongoose.model("User", userSchema);
 export default UserModel;

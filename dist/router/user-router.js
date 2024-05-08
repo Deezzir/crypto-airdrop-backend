@@ -14,4 +14,5 @@ userRouter.post("/addUpdateUser", userController.addUpdateUser);
 //         wallet: walletToSend,
 // }
 userRouter.post("/checkUserByWallet", userController.checkUserByWallet);
+userRouter.get("/getUsersRegistered", userController.getUsersRegistered);
 export default userRouter;

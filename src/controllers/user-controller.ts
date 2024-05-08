@@ -36,6 +36,17 @@ class UserController {
     }
   }
 
+  async getUsersRegistered(req, res, next) {
+    const numberOfUsers = await userService.getNumberOfUsers();
+    try {
+      return res.json({
+        numberOfUsers: numberOfUsers,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async checkUserByWallet(req, res, next) {
     try {
       const { wallet } = req.body;

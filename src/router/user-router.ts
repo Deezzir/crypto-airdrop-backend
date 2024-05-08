@@ -18,4 +18,6 @@ userRouter.post("/addUpdateUser", userController.addUpdateUser);
 // }
 userRouter.post("/checkUserByWallet", userController.checkUserByWallet);
 
+userRouter.get("/getUsersRegistered", userController.getUsersRegistered);
+
 export default userRouter;

@@ -30,6 +30,17 @@ class UserController {
             next(e);
         }
     }
+    async getUsersRegistered(req, res, next) {
+        const numberOfUsers = await userService.getNumberOfUsers();
+        try {
+            return res.json({
+                numberOfUsers: numberOfUsers,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }
     async checkUserByWallet(req, res, next) {
         try {
             const { wallet } = req.body;
@@ -43,6 +54,7 @@ class UserController {
             }
             //TELEGRAM
             const telegramVerified = user.telegramVerified;
+            // WALLET
             let walletVerified = false;
             try {
                 await new PublicKey(wallet);
@@ -51,7 +63,8 @@ class UserController {
             catch (e) { }
             // TWITTER
             // TWITTER POST
-            // WALLET
+            //TODO REGEX ON CREATE/UPDATE
+            //TODO TWITTER
             return res.json({
                 isTelegram: telegramVerified,
                 isTwitter: true,
