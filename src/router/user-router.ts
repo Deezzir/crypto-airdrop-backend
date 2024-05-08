@@ -41,6 +41,14 @@ const validationAddUpdateUser = (req: any, res: any, next: any) => {
 };
 
 const validationCheckUserByWallet = (req: any, res: any, next: any) => {
+    const { wallet } = req.body;
+
+    if (!wallet || !common.checkWallet(wallet)) {
+        return res.json({
+            errorMsg: "Invalid wallet",
+        });
+    }
+
     next();
 };
 
