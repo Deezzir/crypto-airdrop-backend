@@ -8,6 +8,7 @@ import db from "./db.js";
 import userRouter from "./router/user-router.js";
 import TelegramBot from "node-telegram-bot-api";
 import userService from "./services/user-service.js";
+import ErrorMiddleware from "./middlewares/error-middleware.js";
 
 const mongo = db;
 
@@ -31,6 +32,8 @@ bot.on("text", (msg) => {
 });
 
 app.use("/users", userRouter);
+
+app.use(ErrorMiddleware);
 
 await new Promise((resolve: any) => httpServer.listen({ port: 4000 }, resolve));
 console.log(`Server started at http://localhost:4000`);
