@@ -19,6 +19,28 @@ class UserController {
                     errorMsg: "You cannot register after deadline.",
                 });
             }
+            //CHECK IF DATA IS USED FOR ANOTHER WALLET
+            //TG
+            const isValidTG = await userService.checkValidTG(user);
+            if (!isValidTG) {
+                return res.json({
+                    errorMsg: "This Telegram account is assosiated with another registered Wallet entree.",
+                });
+            }
+            //TWITTER
+            const isValidTwitter = await userService.checkValidTwitter(user);
+            if (!isValidTwitter) {
+                return res.json({
+                    errorMsg: "This Twitter account is assosiated with another registered Wallet entree.",
+                });
+            }
+            //TWITTER_LINK
+            const isValidTwitterLink = await userService.checkValidTwitterLink(user);
+            if (!isValidTwitterLink) {
+                return res.json({
+                    errorMsg: "This twitter post is assosiated with another registered Wallet entree.",
+                });
+            }
             const userExists = await userService.getUserByWallet(user.wallet);
             if (userExists) {
                 const updatedUser = await userService.updateUser(user);
@@ -27,12 +49,13 @@ class UserController {
                     isUpdated: true,
                 });
             }
-            if (!user) {
-                return res.json({
-                    isCreated: false,
-                    isUpdated: false,
-                });
-            }
+            //THIS IS COMMENTED BECAUSE WE ADDED cheking request middleware
+            // if (!user) {
+            //   return res.json({
+            //     isCreated: false,
+            //     isUpdated: false,
+            //   });
+            // }
             const newUser = await userService.createUser(user);
             return res.json({
                 isCreated: true,
@@ -74,9 +97,17 @@ class UserController {
             }
             catch (e) { }
             // TWITTER
+            //CHECK IF TWITTER IS SUBSCRIBED TO OUR ACCOUT
             // TWITTER POST
+            //CHECK IF POST HAS OUR @ TAGGED
+            //CHECK IF POST BELONGS TO THE USER MENTIONED FOR THIS ENTREE
+            //GIVE PROPER RESPONSE IF ONE OR ANOTHER RULE WAS NOT FOLLOWED
+            //WE CAN JUST PASS TRUE/FALSE OR WE CAN RETURN ERRORMSG LIKE HERE FOR EACH ERROR:
+            //  return res.json({
+            //    errorMsg:
+            //      "bla bla bla"
+            //  });
             //TODO REGEX ON CREATE/UPDATE
-            //TODO TWITTER
             return res.json({
                 isTelegram: telegramVerified,
                 isTwitter: true,

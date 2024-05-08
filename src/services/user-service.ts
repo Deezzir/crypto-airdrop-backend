@@ -38,6 +38,44 @@ class UserService {
     user.telegramVerified = true;
     user.save();
   }
+
+  async checkValidTG(user) {
+    const userFound = await UserModel.findOne({ telegram: user.telegram });
+
+    if (userFound) {
+      if (user.wallet !== userFound.wallet) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async checkValidTwitter(user) {
+    const userFound = await UserModel.findOne({ twitter: user.twitter });
+
+    if (userFound) {
+      if (user.wallet !== userFound.wallet) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async checkValidTwitterLink(user) {
+    const userFound = await UserModel.findOne({
+      twitterLink: user.twitterLink,
+    });
+
+    if (userFound) {
+      if (user.wallet !== userFound.wallet) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 export default new UserService();
