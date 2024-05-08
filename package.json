@@ -136,6 +136,7 @@
     "tr46": "^4.1.1",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
+    "twitter-api-v2": "^1.16.4",
     "type-is": "^1.6.18",
     "undefsafe": "^2.0.5",
     "undici-types": "^5.26.5",
