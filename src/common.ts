@@ -12,3 +12,19 @@ export function checkWallet(wallet: string) {
         return false;
     }
 }
+
+export function log(msg: string) {
+    console.log(`[INFO ${new Date().toISOString()}] ${msg}`);
+}
+
+export function error(msg: string) {
+    console.error(`[ERROR ${new Date().toISOString()}] ${msg}`);
+}
+
+export function warn(msg: string) {
+    console.warn(`[WARN ${new Date().toISOString()}] ${msg}`);
+}
+
+export function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

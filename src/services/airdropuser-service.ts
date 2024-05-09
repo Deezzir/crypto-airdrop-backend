@@ -1,7 +1,6 @@
-import TelegramBot, { Message, ChatMember } from "node-telegram-bot-api";
-import UserModel from "../models/user.js";
+import UserModel from "../models/airdropUser.js";
 
-class UserService {
+class AirdropUserService {
     async getUserByWallet(wallet: any) {
         const users = await UserModel.findOne({ wallet });
 
@@ -78,4 +77,4 @@ class UserService {
     }
 }
 
-export default new UserService();
+export default new AirdropUserService();

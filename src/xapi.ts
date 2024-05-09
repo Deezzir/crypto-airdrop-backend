@@ -1,19 +1,48 @@
 import { TwitterApi } from "twitter-api-v2";
+import xService from "./services/x-service.js";
 import dotenv from 'dotenv';
+import * as common from './common.js';
 dotenv.config();
 
-const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN;
-const TO_FOLLOW_USER = process.env.TWITTER_USER;
+const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID;
+const TWITTER_CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET;
+const CALLBACK_URL = process.env.CALLBACK_URL || 'http://localhost:4000/xapi-callback';
 
-const bearer = new TwitterApi(BEARER_TOKEN);
-const xClient = bearer.readOnly;
+const client = new TwitterApi({
+    clientId: TWITTER_CLIENT_ID,
+    clientSecret: TWITTER_CLIENT_SECRET
+})
 
-const user_data = await xClient.v2.userByUsername(TO_FOLLOW_USER);
-if (!user_data || user_data.errors) {
-    console.error(`User ${user_data} not found`);
-    process.exit(1);
+const { url, codeVerifier, state: sessionState } = client.generateOAuth2AuthLink(CALLBACK_URL, { scope: ['tweet.read', 'users.read', 'follows.read', 'offline.access'] });
+common.log(`Please visit ${url}\n`);
+
+export async function getXBearer(req: any, res: any) {
+    // Extract state and code from query string
+    const { state, code } = req.query;
+
+    if (!codeVerifier || !state || !sessionState || !code) {
+        return res.status(400).send('You denied the app or your session expired!');
+    }
+    if (state !== sessionState) {
+        return res.status(400).send('Stored tokens didnt match!');
+    }
+
+    // Obtain access token
+    client.loginWithOAuth2({ code, codeVerifier, redirectUri: CALLBACK_URL })
+        .then(async ({ client: loggedClient, accessToken, refreshToken, expiresIn }) => {
+            // {loggedClient} is an authenticated client in behalf of some user
+            // Store {accessToken} somewhere, it will be valid until {expiresIn} is hit.
+            // If you want to refresh your token later, store {refreshToken} (it is present if 'offline.access' has been given as scope)
+
+            common.log('\nSuccessfull Authentication');
+            common.log(`Access Token:  ${accessToken}`);
+            common.log(`Refresh Token: ${refreshToken}`);
+            common.log(`Expires in: ${expiresIn}`);
+
+            xService.setup(accessToken, refreshToken, expiresIn);
+
+            res.status(200).send('Access token obtained!');
+
+        })
+        .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
 }
-console.log(`User to follow ${user_data.data.username} found`);
-const TO_FOLLOW_USER_ID = user_data.data.id;
-
-export { TO_FOLLOW_USER_ID, xClient };

@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const userSchema = new Schema({
     wallet: {
@@ -40,6 +40,6 @@ const userSchema = new Schema({
     },
 });
 
-const UserModel = mongoose.model("User", userSchema);
+const AirdropUserModel = mongoose.model("AirdropUser", userSchema);
 
-export default UserModel;
+export default AirdropUserModel;

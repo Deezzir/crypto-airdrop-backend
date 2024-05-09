@@ -1,8 +1,6 @@
-import { error } from "console";
-import userService from "../services/user-service.js";
-import xService from "../services/x-service.js";
-import { PublicKey } from "@solana/web3.js";
 import * as common from "../common.js";
+import userService from "../services/airdropuser-service.js";
+import xService from "../services/x-service.js";
 
 class UserController {
     async addUpdateUser(req: any, res: any, next: any) {
@@ -98,7 +96,7 @@ class UserController {
     async checkUserByWallet(req: any, res: any, next: any) {
         try {
             const { wallet } = req.body;
-            console.log("wallet = ", wallet);
+            common.log(`wallet = ${wallet}`);
             let errorMsgs: string[] = [];
 
             if (!wallet) return null;

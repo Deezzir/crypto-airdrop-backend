@@ -6,6 +6,9 @@ src/.DS_Store
 
 ### Node ###
 # Logs
+
+dist
+
 logs
 *.log
 npm-debug.log*
