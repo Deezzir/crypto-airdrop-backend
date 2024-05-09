@@ -49,24 +49,11 @@ bot.on("text", (msg: { from: { username: any; }; }) => {
 });
 
 app.use("/users", cors(corsOptions), cookieParser(), bodyParser.json(), userRouter);
-
 app.get("/xapi-callback", getXBearer);
 
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
-
-const bot = new TelegramBot(process.env.TELEGRAM_BOT, { polling: true });
-bot.on('text', (msg: { from: { username: any } }) => {
-    const username = msg.from.username;
-    if (username) {
-        userService.verifyTG(username);
-    }
-});
-
-app.use('/users', userRouter);
-
-app.use(ErrorMiddleware);
 
 app.use((req: any, res: any, next: any) => {
     res.status(404).send({
