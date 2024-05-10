@@ -1,5 +1,6 @@
 import { FollowersV2ParamsWithoutPaginator, TwitterApi, TwitterApiReadOnly, UserV2 } from 'twitter-api-v2';
 import * as common from '../common.js';
+import { X_CLIENT_MAIN } from '../xapi.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -35,12 +36,12 @@ class XService {
 
     async setup(accessToken: string, refreshToken: string, expiresIn: number): Promise<void> {
         const bearer = new TwitterApi(accessToken);
-        common.log('\nXService ready');
+        common.log('XService ready');
 
         this.accessToken = accessToken;
         this.xClient = bearer.readOnly;
         this.refreshToken = refreshToken;
-        this.expiresIn = expiresIn;
+        this.expiresIn = expiresIn - 120;
 
         const user_data = await this.xClient.v2.userByUsername(TO_FOLLOW_USER);
         if (!user_data || user_data.errors) {
@@ -57,7 +58,7 @@ class XService {
     }
 
     async isReady(): Promise<boolean> {
-        return this.xClient ? true : false;
+        return this.xClient !== null;
     }
 
     async getXUser(username: string): Promise<UserV2 | null> {
@@ -132,12 +133,12 @@ class XService {
             return;
         }
 
-        const { client: refreshedClient, accessToken, refreshToken: newRefreshToken, expiresIn } = await this.xClient.refreshOAuth2Token(this.refreshToken);
+        common.log(`Updating XService Token`)
+        const { client: refreshedClient, accessToken, refreshToken: newRefreshToken, expiresIn } = await X_CLIENT_MAIN.refreshOAuth2Token(this.refreshToken);
         this.xClient = refreshedClient;
         this.accessToken = accessToken;
         this.refreshToken = newRefreshToken;
-        this.expiresIn = expiresIn;
-
+        this.expiresIn = expiresIn - 120;
         common.log('XService Token refreshed');
     }
 }

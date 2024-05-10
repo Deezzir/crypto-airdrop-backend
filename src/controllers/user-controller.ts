@@ -1,21 +1,27 @@
 import * as common from "../common.js";
-import userService from "../services/airdropuser-service.js";
+import userAirdropService from "../services/airdropuser-service.js";
+import userPresaleService from "../services/presaleuser-service.js";
 import xService from "../services/x-service.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const MAX_USERS = parseInt(process.env.MAX_USERS, 10) || 1000;
+const MAX_AIRDROP_USERS = parseInt(process.env.MAX_AIRDROP_USERS, 10) || 1000;
+const MAX_PRESALE_USERS = parseInt(process.env.MAX_PRESALE_USERS, 10) || 1000;
+const PRESALE_MIN_SOL_AMOUNT = parseFloat(process.env.PRESALE_MIN_SOL_AMOUNT) || 0;
+const PRESALE_MAX_SOL_AMOUNT = parseFloat(process.env.PRESALE_MAX_SOL_AMOUNT) || 0;
+const DEADLINE_TIME = parseInt(process.env.DEADLINE_TIME, 10) || 0;
+const TWITTER_USER = process.env.TWITTER_USER || "";
 
 class UserController {
     async addUpdateUser(req: any, res: any, next: any) {
         try {
             const { user } = req.body;
 
-            const numberOfUsers = await userService.getNumberOfUsers();
+            const numberOfUsers = await userAirdropService.getNumberOfUsers();
 
             //DO NOT REGISTER/UPDATE USER IF LIMIT IS REACHED
-            if (numberOfUsers >= MAX_USERS) {
-                common.log(`Max number of users is reached: ${MAX_USERS}`);
+            if (numberOfUsers >= MAX_AIRDROP_USERS) {
+                common.log(`Max number of users is reached: ${MAX_AIRDROP_USERS}`);
                 return res.json({
                     errorMsg: "Max number of users is reached.",
                 });
@@ -23,8 +29,8 @@ class UserController {
             //DO NOT REGISTER/UPDATE PEOPLE AFTER DEADLINE
             const currentDate = new Date();
             const milliseconds = currentDate.getMilliseconds();
-            if (milliseconds > Number(process.env.DEADLINE_TIME)) {
-                common.log(`Deadline is reached: ${process.env.DEADLINE_TIME}`);
+            if (milliseconds > DEADLINE_TIME) {
+                common.log(`Deadline is reached: ${DEADLINE_TIME}`);
                 return res.json({
                     errorMsg: "You cannot register after deadline.",
                 });
@@ -33,7 +39,7 @@ class UserController {
             //CHECK IF DATA IS USED FOR ANOTHER WALLET
 
             //TG
-            const isValidTG = await userService.checkValidTG(user);
+            const isValidTG = await userAirdropService.checkValidTG(user);
             if (!isValidTG) {
                 return res.json({
                     errorMsg:
@@ -42,7 +48,7 @@ class UserController {
             }
 
             //TWITTER
-            const isValidTwitter = await userService.checkValidTwitter(user);
+            const isValidTwitter = await userAirdropService.checkValidTwitter(user);
             if (!isValidTwitter) {
                 return res.json({
                     errorMsg:
@@ -51,7 +57,7 @@ class UserController {
             }
 
             //TWITTER_LINK
-            const isValidTwitterLink = await userService.checkValidTwitterLink(user);
+            const isValidTwitterLink = await userAirdropService.checkValidTwitterLink(user);
             if (!isValidTwitterLink) {
                 return res.json({
                     errorMsg:
@@ -59,10 +65,10 @@ class UserController {
                 });
             }
 
-            const userExists = await userService.getUserByWallet(user.wallet);
+            const userExists = await userAirdropService.getUserByWallet(user.wallet);
 
             if (userExists) {
-                const updatedUser = await userService.updateUser(user);
+                const updatedUser = await userAirdropService.updateUser(user);
                 common.log(`User updated: ${updatedUser.wallet}`);
                 return res.json({
                     isCreated: false,
@@ -77,7 +83,7 @@ class UserController {
                 });
             }
 
-            const newUser = await userService.createUser(user);
+            const newUser = await userAirdropService.createUser(user);
             common.log(`User created: ${newUser.wallet}`);
             return res.json({
                 isCreated: true,
@@ -88,12 +94,22 @@ class UserController {
         }
     }
 
-    async getUsersRegistered(req: any, res: any, next: any) {
+    async getDropInfo(req: any, res: any, next: any) {
         try {
-            const numberOfUsers = await userService.getNumberOfUsers();
-            common.log(`Number of users: ${numberOfUsers}`);
+
+            const numberOfAirdrops = await userAirdropService.getNumberOfUsers();
+            const numberOfPresales = await userPresaleService.getNumberOfUsers();
+            common.log(`GetDropInfo - Number of airdrop users: ${numberOfAirdrops}, Number of presale users: ${numberOfPresales}`);
+
             return res.json({
-                numberOfUsers: numberOfUsers,
+                numberOfAirdropUsers: numberOfAirdrops,
+                numberOfPresaleUsers: numberOfPresales,
+                numberOfMaxAirdropUsers: MAX_AIRDROP_USERS,
+                numberOfMaxPresaleUsers: MAX_PRESALE_USERS,
+                presaleMaxSolAmount: PRESALE_MAX_SOL_AMOUNT,
+                presaleMinSolAmount: PRESALE_MIN_SOL_AMOUNT,
+                toFollow: TWITTER_USER,
+                deadline: DEADLINE_TIME,
             });
         } catch (e) {
             next(e);
@@ -108,7 +124,7 @@ class UserController {
 
             if (!wallet) return null;
 
-            const user = await userService.getUserByWallet(wallet);
+            const user = await userAirdropService.getUserByWallet(wallet);
 
             if (!user) return null;
 

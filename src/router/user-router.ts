@@ -86,7 +86,16 @@ userRouter.post(
 // }
 
 // nothing
-userRouter.get("/getUsersRegistered", userController.getUsersRegistered);
-//{ numberOfUsers: number }
+userRouter.get("/getDropInfo", userController.getDropInfo);
+//{ 
+//    numberOfAirdropUsers: number,
+//    numberOfPresaleUsers: number,
+//    numberOfMaxAirdropUsers: number,
+//    numberOfMaxPresaleUsers: number,
+//    presaleMinSolAmount: number,
+//    presaleMaxSolAmount: number,
+//    deadline: string,
+//    toFollow: string;
+//}
 
 export default userRouter;

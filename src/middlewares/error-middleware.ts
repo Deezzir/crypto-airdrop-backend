@@ -1,5 +1,7 @@
+import * as common from '../common.js';
+
 const ErrorMiddleware = (err: any, req: any, res: any, next: any) => {
-    // console.error(err.stack);
+    common.error(err.stack);
     const statusCode = err.status || 500;
     res.status(statusCode).send({
         status: statusCode,

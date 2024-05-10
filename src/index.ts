@@ -48,12 +48,11 @@ bot.on("text", (msg: { from: { username: any; }; }) => {
     }
 });
 
-app.use("/users", cors(corsOptions), cookieParser(), bodyParser.json(), userRouter);
 app.get("/xapi-callback", getXBearer);
-
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
+app.use("/users", cors(corsOptions), cookieParser(), bodyParser.json(), userRouter);
 
 app.use((req: any, res: any, next: any) => {
     res.status(404).send({
