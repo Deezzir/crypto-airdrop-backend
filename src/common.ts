@@ -1,4 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+const PRESALE_MIN_SOL_AMOUNT = parseFloat(process.env.PRESALE_MIN_SOL_AMOUNT) || 0;
+const PRESALE_MAX_SOL_AMOUNT = parseFloat(process.env.PRESALE_MAX_SOL_AMOUNT) || 0;
 
 export const TG_USER_REGEX = /^@?[0-9a-zA-Z_]{5,32}$/;
 export const X_POST_REGEX = /^(https?:\/\/)?(www\.)?(twitter\.com|x\.com)\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]+)$/;
@@ -27,4 +32,11 @@ export function warn(msg: string) {
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function checkSolAmount(solAmount: any) {
+    if (typeof solAmount !== 'number') return false;
+    if (solAmount < PRESALE_MIN_SOL_AMOUNT) return false;
+    if (solAmount > PRESALE_MAX_SOL_AMOUNT) return false;
+    return true;
 }

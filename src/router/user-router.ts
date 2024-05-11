@@ -4,7 +4,7 @@ import * as common from "../common.js";
 
 const userRouter = Router();
 
-const validationAddUpdateUser = (req: any, res: any, next: any) => {
+const validationAddUpdateAirdropUser = (req: any, res: any, next: any) => {
     const { user } = req.body;
 
     if (!user) {
@@ -13,27 +13,27 @@ const validationAddUpdateUser = (req: any, res: any, next: any) => {
         });
     }
 
-    if (!user.telegram || !common.TG_USER_REGEX.test(user.telegram)) {
+    if (!user.wallet || !common.checkWallet(user.wallet)) {
+        return res.json({
+            errorMsg: "No wallet provided",
+        });
+    }
+
+    if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
         return res.json({
             errorMsg: "Invalid telegram username",
         });
     }
 
-    if (!user.twitter || !common.X_USER_REGEX.test(user.twitter)) {
+    if (!user.xUsername || !common.X_USER_REGEX.test(user.xUsername)) {
         return res.json({
             errorMsg: "Invalid twitter username",
         });
     }
 
-    if (!user.twitterLink || !common.X_POST_REGEX.test(user.twitterLink)) {
+    if (!user.xPostLink || !common.X_POST_REGEX.test(user.xPostLink)) {
         return res.json({
             errorMsg: "Invalid twitter link",
-        });
-    }
-
-    if (!user.wallet || !common.checkWallet(user.wallet)) {
-        return res.json({
-            errorMsg: "No wallet provided",
         });
     }
 
@@ -52,26 +52,66 @@ const validationCheckUserByWallet = (req: any, res: any, next: any) => {
     next();
 };
 
+const validationAddUpdatePresaleUser = (req: any, res: any, next: any) => {
+    const { user } = req.body;
+
+    if (!user) {
+        return res.json({
+            errorMsg: "No user provided",
+        });
+    }
+
+    if (!user.wallet || !common.checkWallet(user.wallet)) {
+        return res.json({
+            errorMsg: "No wallet provided",
+        });
+    }
+
+    if (!user.solAmount || !common.checkSolAmount(user.solAmount)) {
+        return res.json({
+            errorMsg: "Invalid sol amount",
+        });
+    }
+
+    next();
+}
+
 // {
 //     user: {
-//         wallet: walletToSend,
-//         twitter: twitterToSend,
-//         twitterLink: twitterLinkToSend,
-//         telegram: telegramToSend,
+//         wallet: string,
+//         xUsername: string,
+//         xPostLink: string,
+//         tgUsername: string,
 //     }
 // }
 userRouter.post(
-    "/addUpdateUser",
-    validationAddUpdateUser,
-    userController.addUpdateUser
+    "/addUpdateAirdropUser",
+    validationAddUpdateAirdropUser,
+    userController.addUpdateAidropUser
 );
 // {
-//     isCreated: true,
-//     isUpdated: false,
+//     isCreated: boolean,
+//     isUpdated: boolean,
 // }
 
 // {
-//         wallet: walletToSend,
+//     user: {
+//         wallet: string,
+//         solAmount: number,
+//     }
+// }
+userRouter.post(
+    "/addUpdatePresaleUser",
+    validationAddUpdatePresaleUser,
+    userController.addUpdatePresaleUser
+);
+// {
+//     isCreated: boolean,
+//     isUpdated: boolean,
+// }
+
+// {
+//         wallet: string,
 // }
 userRouter.post(
     "/checkUserByWallet",
@@ -79,10 +119,14 @@ userRouter.post(
     userController.checkUserByWallet
 );
 // {
-//     isTelegram: telegramVerified,
-//     isTwitter: isTwitterVerified,
-//     isTwitterPost: isTwitterLinkVerified,
-//     isWallet: walletVerified,
+//     isValidTg: boolean,
+//     isValidX: boolean,
+//     isValidXPost: boolean,
+//     isValidWallet: boolean
+//     isPresaleEnrolled: boolean,
+//     isAirdropEnrolled: boolean,
+//     presaleAmount: number,
+//     errorMsgs: string[],
 // }
 
 // nothing
@@ -94,8 +138,11 @@ userRouter.get("/getDropInfo", userController.getDropInfo);
 //    numberOfMaxPresaleUsers: number,
 //    presaleMinSolAmount: number,
 //    presaleMaxSolAmount: number,
+//    presaleSolAmount: number,
+//    dropPublicKey: string,
 //    deadline: string,
-//    toFollow: string;
+//    toXFollow: string;
+//    toTGFollow: string
 //}
 
 export default userRouter;

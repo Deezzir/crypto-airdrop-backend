@@ -10,15 +10,11 @@ const userSchema = new Schema({
         type: Number,
         required: true,
     },
-    isTokensSent: {
-        type: Boolean,
-        default: false,
-    },
-    numberOfTokens: {
+    tokensToSend: {
         type: Number,
         default: null,
     },
-    transactionLink: {
+    tx: {
         type: String,
         default: null,
     },

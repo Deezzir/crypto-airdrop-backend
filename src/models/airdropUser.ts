@@ -6,35 +6,31 @@ const userSchema = new Schema({
         required: true,
         unique: true,
     },
-    twitter: {
+    xUsername: {
         type: String,
         required: true,
         unique: true,
     },
-    twitterLink: {
+    xPostLink: {
         type: String,
         required: true,
         unique: true,
     },
-    telegram: {
+    tgUsername: {
         type: String,
         required: true,
         unique: true,
     },
-    telegramVerified: {
+    tgVerified: {
         type: Boolean,
         required: true,
         default: false,
     },
-    isTokensSent: {
-        type: Boolean,
-        default: false,
-    },
-    numberOfTokens: {
+    tokensToSend: {
         type: Number,
         default: null,
     },
-    transactionLink: {
+    tx: {
         type: String,
         default: null,
     },

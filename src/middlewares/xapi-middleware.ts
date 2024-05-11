@@ -2,7 +2,9 @@ import xService from "../services/x-service.js";
 import * as common from "../common.js";
 
 const XApiMiddleware = async (req: any, res: any, next: any) => {
-    if (await xService.isReady()) {
+    // if (await xService.isReady()) {
+    //     next();
+    if (true) {
         next();
     } else {
         common.log('XApiMiddleware: Service not ready');

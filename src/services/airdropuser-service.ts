@@ -1,45 +1,45 @@
-import UserModel from "../models/airdropUser.js";
+import AirdropUserModel from "../models/airdropUser.js";
 
 class AirdropUserService {
     async getUserByWallet(wallet: any) {
-        const users = await UserModel.findOne({ wallet });
+        const users = await AirdropUserModel.findOne({ wallet });
 
         return users;
     }
 
     async createUser(user: any) {
-        const newUser = await new UserModel(user).save();
+        const newUser = await new AirdropUserModel(user).save();
 
         return newUser;
     }
 
     async getNumberOfUsers() {
-        return await UserModel.countDocuments();
+        return await AirdropUserModel.countDocuments();
     }
 
     async updateUser(user: any) {
-        const userFound = await UserModel.findOne({ wallet: user.wallet });
+        const userFound = await AirdropUserModel.findOne({ wallet: user.wallet });
 
-        userFound.telegram = user.telegram;
-        userFound.twitter = user.twitter;
-        userFound.twitterLink = user.twitterLink;
+        userFound.tgUsername = user.tgUsername;
+        userFound.xUsername = user.xUsername;
+        userFound.xPostLink = user.xPostLink;
 
         return await userFound.save();
     }
 
     async verifyTG(telegram: any) {
-        const user = await UserModel.findOne({ telegram });
+        const user = await AirdropUserModel.findOne({ tgUsername: telegram });
 
-        if (!user || user.telegramVerified) {
+        if (!user || user.tgVerified) {
             return;
         }
 
-        user.telegramVerified = true;
+        user.tgVerified = true;
         user.save();
     }
 
     async checkValidTG(user: any) {
-        const userFound = await UserModel.findOne({ telegram: user.telegram });
+        const userFound = await AirdropUserModel.findOne({ tgUsername: user.telegram });
 
         if (userFound) {
             if (user.wallet !== userFound.wallet) {
@@ -51,7 +51,7 @@ class AirdropUserService {
     }
 
     async checkValidTwitter(user: any) {
-        const userFound = await UserModel.findOne({ twitter: user.twitter });
+        const userFound = await AirdropUserModel.findOne({ xUsername: user.twitter });
 
         if (userFound) {
             if (user.wallet !== userFound.wallet) {
@@ -63,8 +63,8 @@ class AirdropUserService {
     }
 
     async checkValidTwitterLink(user: any) {
-        const userFound = await UserModel.findOne({
-            twitterLink: user.twitterLink,
+        const userFound = await AirdropUserModel.findOne({
+            xPostLink: user.twitterLink,
         });
 
         if (userFound) {
