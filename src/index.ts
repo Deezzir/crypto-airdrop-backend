@@ -22,7 +22,7 @@ xService.setup();
 
 const app = express();
 const httpServer = http.createServer(app);
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 
 var corsOptions = {
     origin: process.env.CLIENT_URL,
@@ -64,4 +64,4 @@ app.use((req: any, res: any, next: any) => {
 
 
 await new Promise((resolve: any) => httpServer.listen({ port: port }, resolve));
-common.log(`Server started at http://localhost:${port}`);
+common.log(`Server is running on port ${port}`);
