@@ -73,7 +73,7 @@ class XService {
         if (user.is_private !== null) return { isValid: false, errorMsg: 'Account cannot be private' };
 
         if (!user.is_blue_verified) {
-            if (user.follower_count < 30 || common.getAgeInDays(user.creation_date) < 60)
+            if (user.follower_count < 50 || common.getAgeInDays(user.creation_date) < 60)
                 return {
                     isValid: false,
                     errorMsg: 'Account must be Blue verified. Or have at least 30 followers and be at least 60 days old',
