@@ -107,8 +107,7 @@ class XService {
 
         if (!postText.includes(`$${TOKEN_TICKER}`)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
 
-
-        if (!tweet.media_url === null) return { isValid: false, errorMsg: 'Post should some image' };
+        if (!tweet.media_url === null) return { isValid: false, errorMsg: 'Post should have some image' };
 
         return { isValid: true, errorMsg: undefined };
     }
