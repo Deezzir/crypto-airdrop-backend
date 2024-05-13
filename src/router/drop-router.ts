@@ -19,11 +19,11 @@ const validationAddUpdateAirdropUser = (req: any, res: any, next: any) => {
         });
     }
 
-    if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
-        return res.status(400).json({
-            errorMsg: "Invalid telegram username",
-        });
-    }
+    // if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
+    //     return res.status(400).json({
+    //         errorMsg: "Invalid telegram username",
+    //     });
+    // }
 
     if (!user.xUsername || !common.X_USER_REGEX.test(user.xUsername)) {
         return res.status(400).json({
