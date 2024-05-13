@@ -8,7 +8,7 @@ const PRESALE_MIN_SOL_AMOUNT = parseFloat(process.env.PRESALE_MIN_SOL_AMOUNT) ||
 const PRESALE_MAX_SOL_AMOUNT = parseFloat(process.env.PRESALE_MAX_SOL_AMOUNT) || 0;
 
 export const TG_USER_REGEX = /^@?[0-9a-zA-Z_]{5,32}$/;
-export const X_POST_REGEX = /^(https?:\/\/)?(www\.)?(twitter\.com|x\.com)\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]+)$/;
+export const X_POST_REGEX = /^(https?:\/\/)?(www\.)?(twitter\.com|x\.com)\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]+)(\?.*)?$/;
 export const X_USER_REGEX = /^@?[0-9a-zA-Z_]{1,15}$/;
 export const X_POST_REPLY_REGEX = /^@[0-9a-zA-Z_]{1,15}.*/
 

@@ -105,7 +105,9 @@ class XService {
 
         if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
-        if (!postText.includes(`$${TOKEN_TICKER}`)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
+        if (!postText.toLowerCase().includes(`$${TOKEN_TICKER}`.toLowerCase())) {
+            return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
+        }
 
         if (tweet.media_url === null) return { isValid: false, errorMsg: 'Post should have some image' };
 
