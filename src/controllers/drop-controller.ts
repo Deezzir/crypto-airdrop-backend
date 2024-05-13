@@ -177,10 +177,12 @@ class UserController {
             const presaleUser = await userPresaleService.getUserByWallet(wallet);
             if (!presaleUser) errorMsgs.push("Presale not enrolled");
 
+            console.log(airdropUser, presaleUser);
+
             return res.status(200).json({
                 isValidWallet: true,
-                isPresaleEnrolled: airdropUser ? true : false,
-                isAirdropEnrolled: presaleUser ? true : false,
+                isPresaleEnrolled: presaleUser ? true : false,
+                isAirdropEnrolled: airdropUser ? true : false,
                 presaleAmount: presaleUser ? presaleUser.solAmount : 0,
                 errorMsgs: errorMsgs,
             });
