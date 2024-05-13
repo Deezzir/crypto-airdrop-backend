@@ -6,8 +6,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import db from "./db.js";
-import { getXBearer } from "./xapi.js";
-import userRouter from "./router/user-router.js";
+import dropRouter from "./router/drop-router.js";
 import TelegramBot from "node-telegram-bot-api";
 import userService from "./services/airdropuser-service.js";
 import ErrorMiddleware from "./middlewares/error-middleware.js";
@@ -40,19 +39,18 @@ app.use(session({
     cookie: { secure: true }
 }));
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT, { polling: true });
-bot.on("text", (msg: { from: { username: any; }; }) => {
-    const username = msg.from.username;
-    if (username) {
-        userService.verifyTG(username);
-    }
-});
+// const bot = new TelegramBot(process.env.TELEGRAM_BOT, { polling: true });
+// bot.on("text", (msg: { from: { username: any; }; }) => {
+//     const username = msg.from.username;
+//     if (username) {
+//         userService.verifyTG(username);
+//     }
+// });
 
-app.get("/xapi-callback", getXBearer);
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
-app.use("/users", cors(corsOptions), cookieParser(), bodyParser.json(), userRouter);
+app.use("/drop", cors(corsOptions), cookieParser(), bodyParser.json(), dropRouter);
 
 app.use((req: any, res: any, next: any) => {
     res.status(404).send({

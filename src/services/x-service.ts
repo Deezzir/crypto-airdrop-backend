@@ -1,11 +1,13 @@
-import { FollowersV2ParamsWithoutPaginator, TwitterApi, TwitterApiReadOnly, UserV2 } from 'twitter-api-v2';
+import { TwitterApiReadOnly } from 'twitter-api-v2';
 import * as common from '../common.js';
-import { X_CLIENT_MAIN } from '../xapi.js';
+import { X_BEARER_CLIENT, getXUserByUsername, X_BASE_API_URL, X_API_HEADERS, getXPost, getXUserFollowings } from '../xapi.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const TO_FOLLOW_USER = process.env.TWITTER_USER;
-const CHECK_INTERVAL = 1000 * 60;
+const TOKEN_TICKET = process.env.TOKEN_TICKET;
+const TO_FOLLOW_ID = process.env.TWITTER_USER_ID;
+const NEXT_FOLLOWING_TOKEN_REGEX = /^0\|[0-9]+$/;
 
 function parseXUrl(url: string): { type: 'post', id: string, user: string } | null {
     if (!common.X_POST_REGEX.test(url)) return null;
@@ -21,125 +23,100 @@ function parseXUrl(url: string): { type: 'post', id: string, user: string } | nu
 }
 
 class XService {
-    xClient: TwitterApiReadOnly | null;
-    accessToken: string | null;
-    toFollowUserId: string | null;
-    refreshToken: string | null;
-    expiresIn: number;
+    xBearerClient: TwitterApiReadOnly | null;
+    ready: boolean = false;
 
     constructor() {
-        this.xClient = null;
-        this.toFollowUserId = null;
-        this.refreshToken = null;
-        this.expiresIn = 0;
-    }
-
-    async setup(accessToken: string, refreshToken: string, expiresIn: number): Promise<void> {
-        const bearer = new TwitterApi(accessToken);
-        common.log('XService ready');
-
-        this.accessToken = accessToken;
-        this.xClient = bearer.readOnly;
-        this.refreshToken = refreshToken;
-        this.expiresIn = expiresIn - 120;
-
-        const user_data = await this.xClient.v2.userByUsername(TO_FOLLOW_USER);
-        if (!user_data || user_data.errors) {
-            common.error(`User ${user_data} not found`);
-            process.exit(1);
-        }
-        common.log(`User to follow ${user_data.data.username} found\n`);
-        this.toFollowUserId = user_data.data.id;
-
-        setInterval(() => {
-            this.expiresIn -= CHECK_INTERVAL / 1000;
-            this.checkRefreshToken();
-        }, CHECK_INTERVAL);
+        this.xBearerClient = X_BEARER_CLIENT;
     }
 
     async isReady(): Promise<boolean> {
-        return this.xClient !== null;
+        const me = await this.xBearerClient.v2.me();
+        if (!me || me.errors) {
+            common.error(`Bearer client is not valid: ${me.errors}`);
+            return false;
+        }
+
+        const checkUrl = `${X_BASE_API_URL}user/details`;
+        const isAvailable = await common.checkApiAvailability(checkUrl, X_API_HEADERS);
+        if (!isAvailable) {
+            common.error(`Api is not available: ${X_BASE_API_URL}`);
+            return false;
+        }
+
+        return true;
     }
 
-    async getXUser(username: string): Promise<UserV2 | null> {
-        if (!this.isReady()) return null;
+    async getXUser(username: string): Promise<any> {
+        if (!this.ready) return null;
         if (!common.X_USER_REGEX.test(username)) return null;
 
         const name = username.replace(/^@/, '');
 
-        const user = await this.xClient.v2.userByUsername(name);
-        if (!user || user.errors) return null;
+        const user = await getXUserByUsername(name);
+        if (!user || (user.detail && user.detail.includes('not found'))) return null;
 
-        return user.data;
+        return user;
     }
 
-    async verifyXUser(user: UserV2): Promise<boolean> {
-        if (!this.isReady()) return false;
-        return await this.checkFollows(user.id, this.toFollowUserId);
+    async verifyX(username: string, postUrl: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
+        if (!this.ready) return { isValid: false, errorMsg: 'Service not ready' };
+
+        const user = await this.getXUser(username);
+        if (!user) return { isValid: false, errorMsg: 'User not found' };
+
+        if (user.is_private !== null) return { isValid: false, errorMsg: 'Account cannot be private' };
+
+        if (!user.is_blue_verified) {
+            if (user.follower_count < 90 || common.getAgeInDays(user.creation_date) < 90)
+                return {
+                    isValid: false,
+                    errorMsg: 'Account must be blue verified or have at least 90 followers and be at least 90 days old',
+                };
+        }
+
+        const isFollowing = await this.checkFollows(user.id, TO_FOLLOW_ID);
+        if (!isFollowing.isValid) return isFollowing;
+
+        const isPostValid = await this.verifyXPost(postUrl, user);
+        if (!isPostValid.isValid) return isPostValid;
+
+        return { isValid: true, errorMsg: undefined };
     }
 
-    async verifyXPost(url: string, user: UserV2): Promise<boolean> {
-        if (!this.isReady()) return false;
+    async verifyXPost(user: any, url: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
+        if (!this.ready) return { isValid: false, errorMsg: 'Service not ready' };
 
         const parsed = parseXUrl(url);
-        if (!parsed) return false;
+        if (!parsed || parsed.type !== 'post') return { isValid: false, errorMsg: 'Invalid URL' };
 
-        if (parsed.type !== 'post' || parsed.user !== user.username) return false;
+        if (parsed.user !== user.username) return { isValid: false, errorMsg: 'This is not your post' };
 
-        const tweet = await this.xClient.v2.singleTweet(parsed.id, {
-            expansions: [
-                'author_id',
-            ],
-            "tweet.fields": [
-                'created_at',
-                'public_metrics',
-                'source',
-                'text',
-            ],
-        });
+        const tweet = await getXPost(parsed.id);
+        if (!tweet || tweet.detail) return { isValid: false, errorMsg: 'Post not found' };
 
-        //TODO CHECK TEXT, TAGS, METRICS, ETC
+        const postText = tweet.text;
+        if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
-        if (!tweet || tweet.errors) return false;
-        return tweet.data.author_id === user.id;
+        if (!postText.includes(TOKEN_TICKET)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
+
+        return { isValid: true, errorMsg: undefined };
     }
 
-    private async checkFollows(userId: string, checkId: string): Promise<boolean> {
-        let params: Partial<FollowersV2ParamsWithoutPaginator> = {
-            max_results: 1000,
-            "user.fields": "id,name,username",
-        };
+    private async checkFollows(userId: string, checkId: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
+        let follows = await getXUserFollowings(userId, undefined);
+        if (!follows || follows.detail) return { isValid: false, errorMsg: 'Failed to get user followings' };
 
-        try {
-            let follows = await this.xClient.v2.following(userId, params);
-            let found = follows.data.find(user => user.id === checkId);
+        let found = follows.results.find((user: any) => user.user_id === checkId);
 
-            while (!found && follows.meta.next_token) {
-                params.pagination_token = follows.meta.next_token;
-                follows = await this.xClient.v2.following(userId, params);
-                found = follows.data.find(user => user.id === checkId);
-            }
-
-            return found ? true : false;
-        } catch (error) {
-            common.error(`Error fetching following for ${userId}: ${error}`);
-        }
-        return false;
-    }
-
-    private async checkRefreshToken(): Promise<void> {
-        if (this.expiresIn > 0 || !this.refreshToken) {
-            common.log(`XService Token not expired, expires in: ${this.expiresIn} secs`);
-            return;
+        while (!found && !follows.continuation_token.test(NEXT_FOLLOWING_TOKEN_REGEX)) {
+            follows = await getXUserFollowings(userId, follows.continuation_token);
+            found = follows.results.find((user: any) => user.user_id === checkId);
         }
 
-        common.log(`Updating XService Token`)
-        const { client: refreshedClient, accessToken, refreshToken: newRefreshToken, expiresIn } = await X_CLIENT_MAIN.refreshOAuth2Token(this.refreshToken);
-        this.xClient = refreshedClient;
-        this.accessToken = accessToken;
-        this.refreshToken = newRefreshToken;
-        this.expiresIn = expiresIn - 120;
-        common.log('XService Token refreshed');
+        if (!found) return { isValid: false, errorMsg: 'Account must follow the provided account' };
+
+        return { isValid: !!found, errorMsg: undefined };
     }
 }
 

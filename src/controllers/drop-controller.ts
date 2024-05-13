@@ -13,18 +13,27 @@ const DEADLINE_TIME = parseInt(process.env.DEADLINE_TIME, 10) || 0;
 const DROP_PUBKEY = process.env.DROP_PUBKEY || "7faQb7SQxswoQyRY47iyYtff6iDG1bt7jSFsUm1cxUp9";
 const TWITTER_USER = process.env.TWITTER_USER || "";
 const TG_GROUP = process.env.TG_GROUP || "";
+const PRESALE_TOKENS = parseInt(process.env.PRESALE_TOKENS, 10) || 0;
+const AIRDROP_TOKENS = parseInt(process.env.AIRDROP_TOKENS, 10) || 0;
 
 class UserController {
     async addUpdatePresaleUser(req: any, res: any, next: any) {
         try {
             const { user } = req.body;
 
+            if (!user) {
+                return res.status(400).json({
+                    isCreated: false,
+                    isUpdated: false,
+                });
+            }
+
             const numberOfUsers = await userAirdropService.getNumberOfUsers();
 
             //DO NOT REGISTER/UPDATE USER IF LIMIT IS REACHED
             if (numberOfUsers >= MAX_AIRDROP_USERS) {
                 common.log(`Max number of users is reached: ${MAX_AIRDROP_USERS}`);
-                return res.json({
+                return res.status(403).json({
                     errorMsg: "Max number of users is reached.",
                 });
             }
@@ -32,7 +41,7 @@ class UserController {
             const time = Date.now() / 1000;
             if (time > DEADLINE_TIME) {
                 common.log(`Deadline is reached: ${DEADLINE_TIME}`);
-                return res.json({
+                return res.status(403).json({
                     errorMsg: "You cannot register after deadline.",
                 });
             }
@@ -41,23 +50,16 @@ class UserController {
 
             if (userExists) {
                 const updatedUser = await userPresaleService.updateUser(user);
-                common.log(`User updated: ${updatedUser.wallet}`);
-                return res.json({
+                common.log(`Presale record updated: ${updatedUser.wallet}`);
+                return res.status(200).json({
                     isCreated: false,
                     isUpdated: true,
                 });
             }
 
-            if (!user) {
-                return res.json({
-                    isCreated: false,
-                    isUpdated: false,
-                });
-            }
-
             const newUser = await userPresaleService.createUser(user);
-            common.log(`User created: ${newUser.wallet}`);
-            return res.json({
+            common.log(`New Presale enroll: ${newUser.wallet}`);
+            return res.status(200).json({
                 isCreated: true,
                 isUpdated: false,
             });
@@ -70,12 +72,19 @@ class UserController {
         try {
             const { user } = req.body;
 
+            if (!user) {
+                return res.status(400).json({
+                    isCreated: false,
+                    isUpdated: false,
+                });
+            }
+
             const numberOfUsers = await userAirdropService.getNumberOfUsers();
 
             //DO NOT REGISTER/UPDATE USER IF LIMIT IS REACHED
             if (numberOfUsers >= MAX_AIRDROP_USERS) {
                 common.log(`Max number of users is reached: ${MAX_AIRDROP_USERS}`);
-                return res.json({
+                return res.status(403).json({
                     errorMsg: "Max number of users is reached.",
                 });
             }
@@ -83,37 +92,16 @@ class UserController {
             const time = Date.now() / 1000;
             if (time > DEADLINE_TIME) {
                 common.log(`Deadline is reached: ${DEADLINE_TIME}`);
-                return res.json({
+                return res.status(403).json({
                     errorMsg: "You cannot register after deadline.",
                 });
             }
 
-            //CHECK IF DATA IS USED FOR ANOTHER WALLET
-
-            //TG
-            const isValidTG = await userAirdropService.checkValidTG(user);
-            if (!isValidTG) {
-                return res.json({
-                    errorMsg:
-                        "This Telegram account is assosiated with another registered Wallet entree.",
-                });
-            }
-
-            //TWITTER
-            const isValidTwitter = await userAirdropService.checkValidTwitter(user);
-            if (!isValidTwitter) {
-                return res.json({
-                    errorMsg:
-                        "This Twitter account is assosiated with another registered Wallet entree.",
-                });
-            }
-
-            //TWITTER_LINK
-            const isValidTwitterLink = await userAirdropService.checkValidTwitterLink(user);
-            if (!isValidTwitterLink) {
-                return res.json({
-                    errorMsg:
-                        "This twitter post is assosiated with another registered Wallet entree.",
+            //VALIDATE USER
+            const { isValid, errorMsg } = await userAirdropService.verify(user);
+            if (!isValid) {
+                return res.status(400).json({
+                    errorMsg: errorMsg,
                 });
             }
 
@@ -121,23 +109,16 @@ class UserController {
 
             if (userExists) {
                 const updatedUser = await userAirdropService.updateUser(user);
-                common.log(`User updated: ${updatedUser.wallet}`);
-                return res.json({
+                common.log(`Airdrop record updated: ${updatedUser.wallet}`);
+                return res.status(200).json({
                     isCreated: false,
                     isUpdated: true,
                 });
             }
 
-            if (!user) {
-                return res.json({
-                    isCreated: false,
-                    isUpdated: false,
-                });
-            }
-
             const newUser = await userAirdropService.createUser(user);
-            common.log(`User created: ${newUser.wallet}`);
-            return res.json({
+            common.log(`New Airdrop enroll: ${newUser.wallet}`);
+            return res.status(200).json({
                 isCreated: true,
                 isUpdated: false,
             });
@@ -154,13 +135,15 @@ class UserController {
             const totalSolAmount = await userPresaleService.getTotalSolAmout();
             common.log(`GetDropInfo - Airdrops: ${numberOfAirdrops}, Presales: ${numberOfPresales}, Total SOL: ${totalSolAmount}`);
 
-            return res.json({
+            return res.status(200).json({
                 numberOfAirdropUsers: numberOfAirdrops,
                 numberOfPresaleUsers: numberOfPresales,
                 numberOfMaxAirdropUsers: MAX_AIRDROP_USERS,
                 numberOfMaxPresaleUsers: MAX_PRESALE_USERS,
                 presaleMaxSolAmount: PRESALE_MAX_SOL_AMOUNT,
                 presaleMinSolAmount: PRESALE_MIN_SOL_AMOUNT,
+                airdropTokenAmount: AIRDROP_TOKENS,
+                presaleTokenAmount: PRESALE_TOKENS,
                 toXFollow: TWITTER_USER,
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
@@ -179,7 +162,7 @@ class UserController {
             let errorMsgs: string[] = [];
 
             if (!wallet || !common.checkWallet(wallet))
-                return res.json({
+                return res.status(400).json({
                     isWallet: false,
                     errorMsgs: ["Invalid wallet"],
                 });
@@ -192,25 +175,7 @@ class UserController {
             const presaleUser = await userPresaleService.getUserByWallet(wallet);
             if (!presaleUser) errorMsgs.push("Presale not enrolled");
 
-            //TELEGRAM
-            // const telegramVerified = user.telegramVerified;
-            // if (!telegramVerified) errorMsgs.push("Telegram was not verified");
-
-            // TWITTER
-            // const xUser = await xService.getXUser(user.twitter);
-            // const isTwitter = await xService.verifyXUser(xUser);
-            // if (!isTwitter) errorMsgs.push("Twitter Account is not following the required account or not found");
-
-            // TWITTER POST
-            //CHECK IF POST HAS OUR @ TAGGED
-            //CHECK IF POST BELONGS TO THE USER MENTIONED FOR THIS ENTREE
-            // const isTwitterPost = await xService.verifyXPost(user.twitterLink, xUser);
-            // if (!isTwitterPost) errorMsgs.push("Twitter post is not valid or not found");
-
-            return res.json({
-                // isValidTg: telegramVerified,
-                // isValidX: isTwitter,
-                // isValidXPost: isTwitterPost,
+            return res.status(200).json({
                 isValidWallet: true,
                 isPresaleEnrolled: airdropUser ? true : false,
                 isAirdropEnrolled: presaleUser ? true : false,

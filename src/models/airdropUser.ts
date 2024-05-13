@@ -21,11 +21,6 @@ const userSchema = new Schema({
         required: true,
         unique: true,
     },
-    tgVerified: {
-        type: Boolean,
-        required: true,
-        default: false,
-    },
     tokensToSend: {
         type: Number,
         default: null,

@@ -10,6 +10,10 @@ const userSchema = new Schema({
         type: Number,
         required: true,
     },
+    txEnroll: {
+        type: String,
+        default: null,
+    },
     tokensToSend: {
         type: Number,
         default: null,

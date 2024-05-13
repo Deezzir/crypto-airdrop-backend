@@ -1,13 +1,15 @@
 import AirdropUserModel from "../models/airdropUser.js";
+import { AirdropUser } from "../common.js";
+import XService from "./x-service.js";
 
 class AirdropUserService {
-    async getUserByWallet(wallet: any) {
+    async getUserByWallet(wallet: string) {
         const users = await AirdropUserModel.findOne({ wallet });
 
         return users;
     }
 
-    async createUser(user: any) {
+    async createUser(user: AirdropUser) {
         const newUser = await new AirdropUserModel(user).save();
 
         return newUser;
@@ -17,7 +19,7 @@ class AirdropUserService {
         return await AirdropUserModel.countDocuments();
     }
 
-    async updateUser(user: any) {
+    async updateUser(user: AirdropUser) {
         const userFound = await AirdropUserModel.findOne({ wallet: user.wallet });
 
         userFound.tgUsername = user.tgUsername;
@@ -27,45 +29,73 @@ class AirdropUserService {
         return await userFound.save();
     }
 
-    async verifyTG(telegram: any) {
-        const user = await AirdropUserModel.findOne({ tgUsername: telegram });
+    async verify(user: AirdropUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
+        const uniquenessCheck = await this.checkUniqueness(user);
+        if (!uniquenessCheck.isValid) return uniquenessCheck;
 
-        if (!user || user.tgVerified) {
-            return;
-        }
+        const isValidTG = await this.verifyTG(user.tgUsername);
+        if (!isValidTG.isValid) return isValidTG;
 
-        user.tgVerified = true;
-        user.save();
+        const isValidX = await XService.verifyX(user.xUsername, user.xPostLink);
+        if (!isValidX.isValid) return isValidX;
+
+        return { isValid: true, errorMsg: undefined };
     }
 
-    async checkValidTG(user: any) {
-        const userFound = await AirdropUserModel.findOne({ tgUsername: user.telegram });
-
-        if (userFound) {
-            if (user.wallet !== userFound.wallet) {
-                return false;
-            }
-        }
-
-        return true;
+    async verifyTG(telegram: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
+        return { isValid: true, errorMsg: undefined };
     }
 
-    async checkValidTwitter(user: any) {
-        const userFound = await AirdropUserModel.findOne({ xUsername: user.twitter });
-
-        if (userFound) {
-            if (user.wallet !== userFound.wallet) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    async checkValidTwitterLink(user: any) {
+    async checkUniqueness(user: AirdropUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
         const userFound = await AirdropUserModel.findOne({
-            xPostLink: user.twitterLink,
+            $or: [
+                { tgUsername: user.tgUsername },
+                { xUsername: user.xUsername },
+                { xPostLink: user.xPostLink }
+            ]
         });
+
+        if (userFound && user.wallet !== userFound.wallet) {
+            if (userFound.tgUsername === user.tgUsername) {
+                return { isValid: false, errorMsg: "The Telegram account is already assosiated with another registered entree." };
+            }
+            if (userFound.xUsername === user.xUsername) {
+                return { isValid: false, errorMsg: "The X account is already assosiated with another registered entree." };
+            }
+            if (userFound.xPostLink === user.xPostLink) {
+                return { isValid: false, errorMsg: "The X post is already assosiated with another registered Wallet entree." };
+            }
+        }
+
+        return { isValid: true, errorMsg: undefined };
+    }
+
+    async checkValidTG(user: AirdropUser) {
+        const userFound = await AirdropUserModel.findOne({ tgUsername: user.tgUsername });
+
+        if (userFound) {
+            if (user.wallet !== userFound.wallet) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    async checkValidX(user: AirdropUser) {
+        const userFound = await AirdropUserModel.findOne({ xUsername: user.xUsername });
+
+        if (userFound) {
+            if (user.wallet !== userFound.wallet) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    async checkValidXLink(user: AirdropUser) {
+        const userFound = await AirdropUserModel.findOne({ xPostLink: user.xPostLink });
 
         if (userFound) {
             if (user.wallet !== userFound.wallet) {

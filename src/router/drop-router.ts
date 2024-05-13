@@ -1,5 +1,5 @@
 import { Router } from "express";
-import userController from "../controllers/user-controller.js";
+import dropController from "../controllers/drop-controller.js";
 import * as common from "../common.js";
 
 const userRouter = Router();
@@ -8,31 +8,31 @@ const validationAddUpdateAirdropUser = (req: any, res: any, next: any) => {
     const { user } = req.body;
 
     if (!user) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "No user provided",
         });
     }
 
     if (!user.wallet || !common.checkWallet(user.wallet)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "No wallet provided",
         });
     }
 
     if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "Invalid telegram username",
         });
     }
 
     if (!user.xUsername || !common.X_USER_REGEX.test(user.xUsername)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "Invalid twitter username",
         });
     }
 
     if (!user.xPostLink || !common.X_POST_REGEX.test(user.xPostLink)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "Invalid twitter link",
         });
     }
@@ -44,7 +44,7 @@ const validationCheckUserByWallet = (req: any, res: any, next: any) => {
     const { wallet } = req.body;
 
     if (!wallet || !common.checkWallet(wallet)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "Invalid wallet",
         });
     }
@@ -56,19 +56,19 @@ const validationAddUpdatePresaleUser = (req: any, res: any, next: any) => {
     const { user } = req.body;
 
     if (!user) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "No user provided",
         });
     }
 
     if (!user.wallet || !common.checkWallet(user.wallet)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "No wallet provided",
         });
     }
 
     if (!user.solAmount || !common.checkSolAmount(user.solAmount)) {
-        return res.json({
+        return res.status(400).json({
             errorMsg: "Invalid sol amount",
         });
     }
@@ -87,7 +87,7 @@ const validationAddUpdatePresaleUser = (req: any, res: any, next: any) => {
 userRouter.post(
     "/addUpdateAirdropUser",
     validationAddUpdateAirdropUser,
-    userController.addUpdateAidropUser
+    dropController.addUpdateAidropUser
 );
 // {
 //     isCreated: boolean,
@@ -98,12 +98,13 @@ userRouter.post(
 //     user: {
 //         wallet: string,
 //         solAmount: number,
+//         txEnroll: string,
 //     }
 // }
 userRouter.post(
     "/addUpdatePresaleUser",
     validationAddUpdatePresaleUser,
-    userController.addUpdatePresaleUser
+    dropController.addUpdatePresaleUser
 );
 // {
 //     isCreated: boolean,
@@ -116,12 +117,9 @@ userRouter.post(
 userRouter.post(
     "/checkUserByWallet",
     validationCheckUserByWallet,
-    userController.checkUserByWallet
+    dropController.checkUserByWallet
 );
 // {
-//     isValidTg: boolean,
-//     isValidX: boolean,
-//     isValidXPost: boolean,
 //     isValidWallet: boolean
 //     isPresaleEnrolled: boolean,
 //     isAirdropEnrolled: boolean,
@@ -130,7 +128,7 @@ userRouter.post(
 // }
 
 // nothing
-userRouter.get("/getDropInfo", userController.getDropInfo);
+userRouter.get("/getDropInfo", dropController.getDropInfo);
 //{ 
 //    numberOfAirdropUsers: number,
 //    numberOfPresaleUsers: number,
@@ -138,6 +136,8 @@ userRouter.get("/getDropInfo", userController.getDropInfo);
 //    numberOfMaxPresaleUsers: number,
 //    presaleMinSolAmount: number,
 //    presaleMaxSolAmount: number,
+//    prasaleTokenAmount: number,
+//    airdropTokenAmount: number,
 //    presaleSolAmount: number,
 //    dropPublicKey: string,
 //    deadline: string,
