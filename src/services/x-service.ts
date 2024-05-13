@@ -94,11 +94,12 @@ class XService {
 
         const parsed = parseXUrl(url);
         if (!parsed || parsed.type !== 'post') return { isValid: false, errorMsg: 'Invalid Post Link' };
-
-        if (parsed.user !== user.username) return { isValid: false, errorMsg: 'This is not your post' };
+        console.log(parsed);
 
         const tweet = await getXPost(parsed.id);
         if (!tweet || tweet.detail) return { isValid: false, errorMsg: 'Post not found' };
+
+        if (tweet.user.user_id !== user.user_id) return { isValid: false, errorMsg: 'This is not your post' };
 
         const postText: string = tweet.text;
         if (common.X_POST_REPLY_REGEX.test(postText)) return { isValid: false, errorMsg: "Post should not be a reply. Don't start the post with @" };
