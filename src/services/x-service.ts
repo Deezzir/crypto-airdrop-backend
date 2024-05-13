@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const TO_FOLLOW_USER = process.env.TWITTER_USER;
-const TOKEN_TICKET = process.env.TOKEN_TICKET;
+const TOKEN_TICKER = process.env.TOKEN_TICKER;
 const TO_FOLLOW_ID = process.env.TWITTER_USER_ID;
 const NEXT_FOLLOWING_TOKEN_REGEX = /^0\|[0-9]+$/;
 
@@ -80,10 +80,10 @@ class XService {
                 };
         }
 
-        const isFollowing = await this.checkFollows(user.id, TO_FOLLOW_ID);
+        const isFollowing = await this.checkFollows(user.user_id, TO_FOLLOW_ID);
         if (!isFollowing.isValid) return isFollowing;
 
-        const isPostValid = await this.verifyXPost(postUrl, user);
+        const isPostValid = await this.verifyXPost(user, postUrl);
         if (!isPostValid.isValid) return isPostValid;
 
         return { isValid: true, errorMsg: undefined };
@@ -103,7 +103,8 @@ class XService {
         const postText = tweet.text;
         if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
-        if (!postText.includes(TOKEN_TICKET)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
+        console.log(postText);
+        if (!postText.includes(`$${TOKEN_TICKER}`)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
 
         return { isValid: true, errorMsg: undefined };
     }
