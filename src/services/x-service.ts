@@ -100,8 +100,8 @@ class XService {
         const tweet = await getXPost(parsed.id);
         if (!tweet || tweet.detail) return { isValid: false, errorMsg: 'Post not found' };
 
-        const postText = tweet.text;
-        if (postText.test(common.X_POST_REPLY_REGEX)) return { isValid: false, errorMsg: 'Post should not be a reply' };
+        const postText: string = tweet.text;
+        if (common.X_POST_REPLY_REGEX.test(postText)) return { isValid: false, errorMsg: 'Post should not be a reply' };
 
         if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
