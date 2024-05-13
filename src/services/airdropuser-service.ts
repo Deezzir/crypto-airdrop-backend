@@ -33,8 +33,8 @@ class AirdropUserService {
         const uniquenessCheck = await this.checkUniqueness(user);
         if (!uniquenessCheck.isValid) return uniquenessCheck;
 
-        const isValidTG = await this.verifyTG(user.tgUsername);
-        if (!isValidTG.isValid) return isValidTG;
+        // const isValidTG = await this.verifyTG(user.tgUsername);
+        // if (!isValidTG.isValid) return isValidTG;
 
         const isValidX = await XService.verifyX(user.xUsername, user.xPostLink);
         if (!isValidX.isValid) return isValidX;
@@ -50,15 +50,15 @@ class AirdropUserService {
         const userFound = await AirdropUserModel.findOne({
             $or: [
                 { tgUsername: user.tgUsername },
-                { xUsername: user.xUsername },
+                // { xUsername: user.xUsername },
                 { xPostLink: user.xPostLink }
             ]
         });
 
         if (userFound && user.wallet !== userFound.wallet) {
-            if (userFound.tgUsername === user.tgUsername) {
-                return { isValid: false, errorMsg: "The Telegram account is already assosiated with another registered entree." };
-            }
+            // if (userFound.tgUsername === user.tgUsername) {
+            //     return { isValid: false, errorMsg: "The Telegram account is already assosiated with another registered entree." };
+            // }
             if (userFound.xUsername === user.xUsername) {
                 return { isValid: false, errorMsg: "The X account is already assosiated with another registered entree." };
             }

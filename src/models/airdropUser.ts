@@ -18,8 +18,8 @@ const userSchema = new Schema({
     },
     tgUsername: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
+        unique: false,
     },
     tokensToSend: {
         type: Number,
