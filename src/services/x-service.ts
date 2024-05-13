@@ -30,21 +30,26 @@ class XService {
         this.xBearerClient = X_BEARER_CLIENT;
     }
 
-    async isReady(): Promise<boolean> {
-        const me = await this.xBearerClient.v2.me();
-        if (!me || me.errors) {
-            common.error(`Bearer client is not valid: ${me.errors}`);
-            return false;
-        }
+    async setup(): Promise<void> {
+        // const me = await this.xBearerClient.v2.me();
+        // if (!me || me.errors) {
+        //     common.error(`Bearer client is not valid: ${me.errors}`);
+        //     this.ready = false;
+        // }
 
         const checkUrl = `${X_BASE_API_URL}user/details`;
         const isAvailable = await common.checkApiAvailability(checkUrl, X_API_HEADERS);
         if (!isAvailable) {
             common.error(`Api is not available: ${X_BASE_API_URL}`);
-            return false;
+            this.ready = false;
         }
 
-        return true;
+        this.ready = true;
+    }
+
+
+    async isReady(): Promise<boolean> {
+        return this.ready;
     }
 
     async getXUser(username: string): Promise<any> {

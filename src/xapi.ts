@@ -5,12 +5,12 @@ import * as common from './common.js';
 import axios from "axios";
 dotenv.config();
 
-const X_BEARER = process.env.X_BEARER_TOKEN;
+const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN;
 const X_BASE_API_URL = process.env.X_BASE_API_URL;
 const X_API_KEY = process.env.X_API_KEY;
 const X_API_HOST = process.env.X_API_HOST;
 
-const X_BEARER_CLIENT = new TwitterApi(X_BEARER).readOnly;
+const X_BEARER_CLIENT = new TwitterApi(X_BEARER_TOKEN).readOnly;
 
 const X_API_HEADERS = {
     'X-RapidAPI-Key': X_API_KEY,

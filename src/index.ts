@@ -3,21 +3,22 @@ import http from "http";
 import cors from "cors";
 import "dotenv/config";
 import bodyParser from "body-parser";
+import queue from 'express-queue';
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import db from "./db.js";
 import dropRouter from "./router/drop-router.js";
-import TelegramBot from "node-telegram-bot-api";
-import userService from "./services/airdropuser-service.js";
 import ErrorMiddleware from "./middlewares/error-middleware.js";
 import helmet from "helmet";
 import RateLimiterMiddleware from "./middlewares/ratelimit-middleware.js";
 import dotenv from "dotenv";
 import XApiMiddleware from "./middlewares/xapi-middleware.js";
 import * as common from "./common.js";
+import xService from "./services/x-service.js";
 dotenv.config();
 
 const mongo = db;
+xService.setup();
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -50,6 +51,7 @@ app.use(session({
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
+app.use(queue({ activeLimit: 3, queuedLimit: -1 }));
 app.use("/drop", cors(corsOptions), cookieParser(), bodyParser.json(), dropRouter);
 
 app.use((req: any, res: any, next: any) => {

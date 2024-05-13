@@ -59,7 +59,6 @@ export async function checkApiAvailability(url: string, headers: any) {
     try {
         const response = await axios.get(url, { headers });
         if (response.status === 200) {
-            common.log('API is available.');
             return true;
         }
     } catch (error: any) {

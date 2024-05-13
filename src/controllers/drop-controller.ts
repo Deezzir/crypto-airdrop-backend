@@ -14,6 +14,7 @@ const DROP_PUBKEY = process.env.DROP_PUBKEY || "7faQb7SQxswoQyRY47iyYtff6iDG1bt7
 const TWITTER_USER = process.env.TWITTER_USER || "";
 const TG_GROUP = process.env.TG_GROUP || "";
 const PRESALE_TOKENS = parseInt(process.env.PRESALE_TOKENS, 10) || 0;
+const TOKEN_TICKER = process.env.TOKEN_TICKER || "";
 const AIRDROP_TOKENS = parseInt(process.env.AIRDROP_TOKENS, 10) || 0;
 
 class UserController {
@@ -148,6 +149,7 @@ class UserController {
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
                 toTGFollow: TG_GROUP,
+                tockenTicker: TOKEN_TICKER,
                 deadline: DEADLINE_TIME,
             });
         } catch (e) {

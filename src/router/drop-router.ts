@@ -136,10 +136,11 @@ userRouter.get("/getDropInfo", dropController.getDropInfo);
 //    numberOfMaxPresaleUsers: number,
 //    presaleMinSolAmount: number,
 //    presaleMaxSolAmount: number,
-//    prasaleTokenAmount: number,
+//    presaleTokenAmount: number,
 //    airdropTokenAmount: number,
 //    presaleSolAmount: number,
 //    dropPublicKey: string,
+//    tockenTicker: string,
 //    deadline: string,
 //    toXFollow: string;
 //    toTGFollow: string
