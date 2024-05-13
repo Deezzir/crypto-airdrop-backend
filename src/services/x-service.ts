@@ -76,7 +76,7 @@ class XService {
             if (user.follower_count < 90 || common.getAgeInDays(user.creation_date) < 90)
                 return {
                     isValid: false,
-                    errorMsg: 'Account must be blue verified or have at least 90 followers and be at least 90 days old',
+                    errorMsg: 'Account must be blue verified. Or have at least 90 followers and be at least 90 days old',
                 };
         }
 
@@ -93,7 +93,7 @@ class XService {
         if (!this.ready) return { isValid: false, errorMsg: 'Service not ready' };
 
         const parsed = parseXUrl(url);
-        if (!parsed || parsed.type !== 'post') return { isValid: false, errorMsg: 'Invalid URL' };
+        if (!parsed || parsed.type !== 'post') return { isValid: false, errorMsg: 'Invalid Post Link' };
 
         if (parsed.user !== user.username) return { isValid: false, errorMsg: 'This is not your post' };
 
@@ -101,7 +101,7 @@ class XService {
         if (!tweet || tweet.detail) return { isValid: false, errorMsg: 'Post not found' };
 
         const postText: string = tweet.text;
-        if (common.X_POST_REPLY_REGEX.test(postText)) return { isValid: false, errorMsg: 'Post should not be a reply' };
+        if (common.X_POST_REPLY_REGEX.test(postText)) return { isValid: false, errorMsg: "Post should not be a reply. Don't start the post with @" };
 
         if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
