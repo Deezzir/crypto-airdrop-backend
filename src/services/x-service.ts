@@ -101,10 +101,14 @@ class XService {
         if (!tweet || tweet.detail) return { isValid: false, errorMsg: 'Post not found' };
 
         const postText = tweet.text;
+        if (postText.test(common.X_POST_REPLY_REGEX)) return { isValid: false, errorMsg: 'Post should not be a reply' };
+
         if (!postText.includes(`@${TO_FOLLOW_USER}`)) return { isValid: false, errorMsg: 'Post must mention the provided account' };
 
-        console.log(postText);
         if (!postText.includes(`$${TOKEN_TICKER}`)) return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
+
+
+        if (!tweet.media_url === null) return { isValid: false, errorMsg: 'Post should some image' };
 
         return { isValid: true, errorMsg: undefined };
     }
