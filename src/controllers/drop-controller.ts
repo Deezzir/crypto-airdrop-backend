@@ -149,7 +149,7 @@ class UserController {
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
                 toTGFollow: TG_GROUP,
-                tockenTicker: TOKEN_TICKER,
+                tokenTicker: TOKEN_TICKER,
                 deadline: DEADLINE_TIME,
             });
         } catch (e) {

@@ -140,7 +140,7 @@ userRouter.get("/getDropInfo", dropController.getDropInfo);
 //    airdropTokenAmount: number,
 //    presaleSolAmount: number,
 //    dropPublicKey: string,
-//    tockenTicker: string,
+//    tokenTicker: string,
 //    deadline: string,
 //    toXFollow: string;
 //    toTGFollow: string
