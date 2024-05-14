@@ -1,4 +1,12 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+
+interface IPresaleUser extends Document {
+    wallet: string;
+    solAmount: number;
+    txEnroll: string[];
+    tokensToSend?: number;
+    tx?: string;
+}
 
 const userSchema = new Schema({
     wallet: {
@@ -11,7 +19,7 @@ const userSchema = new Schema({
         required: true,
     },
     txEnroll: {
-        type: String,
+        type: [String],
         default: null,
     },
     tokensToSend: {
@@ -24,6 +32,6 @@ const userSchema = new Schema({
     },
 });
 
-const PresaleUserModel = mongoose.model("PresaleUser", userSchema);
+const PresaleUserModel = mongoose.model<IPresaleUser>("PresaleUser", userSchema);
 
 export default PresaleUserModel;

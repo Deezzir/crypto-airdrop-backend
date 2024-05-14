@@ -8,7 +8,7 @@ const PRESALE_MAX_SOL_AMOUNT = parseFloat(process.env.PRESALE_MAX_SOL_AMOUNT) ||
 class PresaleUserService {
     async verify(user: PresaleUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
         const record = await this.getUserByWallet(user.wallet);
-        if (!record) return { isValid: false, errorMsg: "Failed to verify user" };
+        if (!record) return { isValid: true, errorMsg: undefined };
 
         if (record.solAmount + user.solAmount > PRESALE_MAX_SOL_AMOUNT) {
             return { isValid: false, errorMsg: `You will exceed the maximum amount of ${PRESALE_MAX_SOL_AMOUNT} SOL` };
@@ -53,6 +53,7 @@ class PresaleUserService {
         const userFound = await PresaleUserModel.findOne({ wallet: user.wallet });
 
         userFound.solAmount += user.solAmount;
+        userFound.txEnroll.push(user.txEnroll);
 
         return await userFound.save();
     }

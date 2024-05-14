@@ -1,4 +1,14 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
+import { AirdropUser } from "../common";
+
+interface IAirdropUser extends Document {
+    wallet: string;
+    xUsername: string;
+    xPostLink: string;
+    tgUsername?: string;
+    tokensToSend?: number;
+    tx?: string;
+}
 
 const userSchema = new Schema({
     wallet: {
@@ -31,6 +41,6 @@ const userSchema = new Schema({
     },
 });
 
-const AirdropUserModel = mongoose.model("AirdropUser", userSchema);
+const AirdropUserModel = mongoose.model<AirdropUser>("AirdropUser", userSchema);
 
 export default AirdropUserModel;

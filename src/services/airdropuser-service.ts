@@ -1,11 +1,30 @@
 import AirdropUserModel from "../models/airdropUser.js";
 import { AirdropUser } from "../common.js";
 import XService from "./x-service.js";
+import * as common from "../common.js";
 
 class AirdropUserService {
     async getUserByWallet(wallet: string) {
         const user = await AirdropUserModel.findOne({ wallet });
 
+        return user;
+    }
+
+    async getUserByFields(fields: { [key: string]: string | undefined }) {
+        const query = Object.keys(fields).reduce((acc, key) => {
+            const value = fields[key];
+            if (value !== undefined && value !== null) {
+                acc[key] = value;
+            }
+            return acc;
+        }, {});
+
+        if (Object.keys(query).length === 0) {
+            common.error("No valid fields provided for the query.");
+            return null;
+        }
+
+        const user = await AirdropUserModel.findOne({ $or: Object.entries(query).map(([key, value]) => ({ [key]: value })) });
         return user;
     }
 

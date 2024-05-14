@@ -1,3 +1,4 @@
+import { error } from "console";
 import * as common from "../common.js";
 import userAirdropService from "../services/airdropuser-service.js";
 import userPresaleService from "../services/presaleuser-service.js";
@@ -23,23 +24,24 @@ class UserController {
         try {
             const { user } = req.body;
 
+            common.log(`addUpdatePresaleUser - user: ${JSON.stringify(user)}`);
+
             if (!user) {
                 return res.status(400).json({
-                    isCreated: false,
-                    isUpdated: false,
+                    errorMsg: "No user provided",
                 });
             }
 
             const numberOfUsers = await userAirdropService.getNumberOfUsers();
 
-            //DO NOT REGISTER/UPDATE USER IF LIMIT IS REACHED
+            //DO NOT REGISTER USER IF LIMIT IS REACHED
             if (numberOfUsers >= MAX_AIRDROP_USERS) {
                 common.log(`Max number of users is reached: ${MAX_AIRDROP_USERS}`);
                 return res.status(403).json({
                     errorMsg: "Max number of users is reached.",
                 });
             }
-            //DO NOT REGISTER/UPDATE PEOPLE AFTER DEADLINE
+            //DO NOT REGISTER PEOPLE AFTER DEADLINE
             const time = Date.now() / 1000;
             if (time > DEADLINE_TIME) {
                 common.log(`Deadline is reached: ${DEADLINE_TIME}`);
@@ -59,11 +61,8 @@ class UserController {
             const userExists = await userPresaleService.getUserByWallet(user.wallet);
 
             if (userExists) {
-                const updatedUser = await userPresaleService.updateUser(user);
-                common.log(`Presale record updated: ${updatedUser.wallet}`);
-                return res.status(200).json({
-                    isCreated: false,
-                    isUpdated: true,
+                return res.status(400).json({
+                    errorMsg: "User already enrolled",
                 });
             }
 
@@ -71,7 +70,6 @@ class UserController {
             common.log(`New Presale enroll: ${newUser.wallet}`);
             return res.status(200).json({
                 isCreated: true,
-                isUpdated: false,
             });
         } catch (e) {
             next(e);
@@ -81,6 +79,8 @@ class UserController {
     async addUpdateAidropUser(req: any, res: any, next: any) {
         try {
             const { user } = req.body;
+
+            common.log(`addUpdateAidropUser - user: ${JSON.stringify(user)}`);
 
             if (!user) {
                 return res.status(400).json({
@@ -171,7 +171,7 @@ class UserController {
     async checkUserByWallet(req: any, res: any, next: any) {
         try {
             const { wallet } = req.body;
-            common.log(`wallet = ${wallet}`);
+            common.log(`CheckUserByWallet - wallet: ${wallet}`);
             let errorMsgs: string[] = [];
 
             if (!wallet || !common.checkWallet(wallet))
@@ -195,6 +195,76 @@ class UserController {
                 presaleAmount: presaleUser ? presaleUser.solAmount : 0,
                 errorMsgs: errorMsgs,
             });
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getPresaleUser(req: any, res: any, next: any) {
+        try {
+            const { wallet } = req.query;
+            common.log(`GetPresaleUser - wallet: ${wallet}`);
+
+            if (!wallet || !common.checkWallet(wallet))
+                return res.status(403).json({
+                    errorMsg: "Invalid wallet",
+                });
+
+            const user = await userPresaleService.getUserByWallet(wallet);
+            if (!user) {
+                return res.status(200).json({
+                    detail: "Presale user not found",
+                });
+            } else {
+                return res.status(200).json({
+                    wallet: user.wallet,
+                    solAmount: user.solAmount,
+                    txEnroll: user.txEnroll,
+                });
+            }
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getAirdropUser(req: any, res: any, next: any) {
+        try {
+            const { wallet, xUsername, xPostLink } = req.query;
+            common.log(`GetAirdropUser - field: ${wallet || xUsername || xPostLink}`);
+
+            if (!wallet && !xUsername && !xPostLink)
+                return res.status(403).json({
+                    errorMsg: "Invalid field",
+                });
+
+            if (wallet && !common.checkWallet(wallet))
+                return res.status(403).json({
+                    errorMsg: "Invalid wallet",
+                });
+
+            if (xUsername && !common.X_USER_REGEX.test(xUsername))
+                return res.status(403).json({
+                    errorMsg: "Invalid twitter username",
+                });
+
+            if (xPostLink && !common.X_POST_REGEX.test(xPostLink))
+                return res.status(403).json({
+                    errorMsg: "Invalid twitter link",
+                });
+
+            const user = await userAirdropService.getUserByFields({ wallet, xUsername, xPostLink });
+            if (!user) {
+                return res.status(200).json({
+                    detail: "Airdrop user not found",
+                });
+            } else {
+                return res.status(200).json({
+                    wallet: user.wallet,
+                    xUsername: user.xUsername,
+                    xPostLink: user.xPostLink,
+                    tgUsername: user.tgUsername,
+                });
+            }
         } catch (e) {
             next(e);
         }
