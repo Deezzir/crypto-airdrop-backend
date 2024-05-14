@@ -4,9 +4,9 @@ import XService from "./x-service.js";
 
 class AirdropUserService {
     async getUserByWallet(wallet: string) {
-        const users = await AirdropUserModel.findOne({ wallet });
+        const user = await AirdropUserModel.findOne({ wallet });
 
-        return users;
+        return user;
     }
 
     async createUser(user: AirdropUser) {

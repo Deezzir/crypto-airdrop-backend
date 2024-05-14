@@ -15,6 +15,7 @@ export const X_POST_REPLY_REGEX = /^@[0-9a-zA-Z_]{1,15}.*/
 export interface PresaleUser {
     wallet: string;
     solAmount: number;
+    txEnroll: string;
 }
 
 export interface AirdropUser {

@@ -1,7 +1,6 @@
 import * as common from "../common.js";
 import userAirdropService from "../services/airdropuser-service.js";
 import userPresaleService from "../services/presaleuser-service.js";
-import xService from "../services/x-service.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,6 +15,8 @@ const TG_GROUP = process.env.TG_GROUP || "";
 const PRESALE_TOKENS = parseInt(process.env.PRESALE_TOKENS, 10) || 0;
 const TOKEN_TICKER = process.env.TOKEN_TICKER || "";
 const AIRDROP_TOKENS = parseInt(process.env.AIRDROP_TOKENS, 10) || 0;
+const TWITTER_AGE = parseInt(process.env.TWITTER_AGE, 10) || 60;
+const TWITTER_FOLLOWERS = parseInt(process.env.TWITTER_FOLLOWERS, 10) || 30;
 
 class UserController {
     async addUpdatePresaleUser(req: any, res: any, next: any) {
@@ -44,6 +45,14 @@ class UserController {
                 common.log(`Deadline is reached: ${DEADLINE_TIME}`);
                 return res.status(403).json({
                     errorMsg: "You cannot register after deadline.",
+                });
+            }
+
+            //VALIDATE USER
+            const { isValid, errorMsg } = await userPresaleService.verify(user);
+            if (!isValid) {
+                return res.status(400).json({
+                    errorMsg: errorMsg,
                 });
             }
 
@@ -149,6 +158,8 @@ class UserController {
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
                 toTGFollow: TG_GROUP,
+                xFollowers: TWITTER_FOLLOWERS,
+                xAge: TWITTER_AGE,
                 tokenTicker: TOKEN_TICKER,
                 deadline: DEADLINE_TIME,
             });

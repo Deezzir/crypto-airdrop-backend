@@ -143,6 +143,8 @@ userRouter.get("/getDropInfo", dropController.getDropInfo);
 //    tokenTicker: string,
 //    deadline: string,
 //    toXFollow: string;
+//    xFollowers: number;
+//    xAge: number;
 //    toTGFollow: string
 //}
 
