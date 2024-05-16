@@ -61,15 +61,21 @@ class UserController {
             const userExists = await userPresaleService.getUserByWallet(user.wallet);
 
             if (userExists) {
-                return res.status(400).json({
-                    errorMsg: "User already enrolled",
-                });
+                if (userExists) {
+                    const updatedUser = await userPresaleService.updateUser(user);
+                    common.log(`Presale record updated: ${updatedUser.wallet}`);
+                    return res.status(200).json({
+                        isCreated: false,
+                        isUpdated: true,
+                    });
+                }
             }
 
             const newUser = await userPresaleService.createUser(user);
             common.log(`New Presale enroll: ${newUser.wallet}`);
             return res.status(200).json({
                 isCreated: true,
+                isUpdated: false,
             });
         } catch (e) {
             next(e);
@@ -84,8 +90,7 @@ class UserController {
 
             if (!user) {
                 return res.status(400).json({
-                    isCreated: false,
-                    isUpdated: false,
+                    errorMsg: "No user provided",
                 });
             }
 

@@ -120,7 +120,7 @@ class XService {
 
         let found = follows.results.find((user: any) => user.user_id === checkId);
 
-        while (!found && !follows.continuation_token.test(NEXT_FOLLOWING_TOKEN_REGEX)) {
+        while (!found && !NEXT_FOLLOWING_TOKEN_REGEX.test(follows.continuation_token)) {
             follows = await getXUserFollowings(userId, follows.continuation_token);
             found = follows.results.find((user: any) => user.user_id === checkId);
         }
