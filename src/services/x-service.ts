@@ -103,9 +103,11 @@ class XService {
         const postText: string = tweet.text;
         if (common.X_POST_REPLY_REGEX.test(postText)) return { isValid: false, errorMsg: "Post should not be a reply. Don't start the post with @" };
 
-        if (!postText.toLowerCase().includes(`@${TO_FOLLOW_USER}`.toLowerCase())) return { isValid: false, errorMsg: 'Post must mention the provided account' };
+        const lowerText = postText.toLowerCase();
 
-        if (!postText.toLowerCase().includes(`$${TOKEN_TICKER}`.toLowerCase())) {
+        if (!lowerText.includes(`@${TO_FOLLOW_USER}`.toLowerCase())) return { isValid: false, errorMsg: 'Post must mention the provided account' };
+
+        if (!lowerText.includes(`$${TOKEN_TICKER}`.toLowerCase())) {
             return { isValid: false, errorMsg: 'Post must contain the provided token ticker' };
         }
 
