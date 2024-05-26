@@ -3,7 +3,6 @@ import http from 'http';
 import cors from 'cors';
 import 'dotenv/config';
 import bodyParser from 'body-parser';
-import queue from 'express-queue';
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import db from "./db.js";
@@ -62,7 +61,6 @@ app.use("/check", checkRouter);
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
-app.use(queue({ activeLimit: 3, queuedLimit: -1 }));
 app.use(
     '/drop',
     cors(corsOptions),

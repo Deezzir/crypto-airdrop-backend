@@ -1,6 +1,7 @@
 import { Router } from "express";
 import dropController from "../controllers/drop-controller.js";
 import * as common from "../common.js";
+import queue from 'express-queue';
 
 const dropRouter = Router();
 const presaleRouter = Router();
@@ -119,6 +120,14 @@ dropRouter.post(
 
 //--------------------airdrop--------------------
 
+// ?wallet=string?xUsername=string?xPostLink=string
+airdropRouter.get("/user", dropController.getAirdropUser);
+// {
+//    wallet: string,
+//    xUsername: string,
+//    xPostLink: string,
+// }
+
 // {
 //     user: {
 //         wallet: string,
@@ -127,6 +136,7 @@ dropRouter.post(
 //         tgUsername: string,
 //     }
 // }
+airdropRouter.use(queue({ activeLimit: 3, queuedLimit: -1 }));
 airdropRouter.post(
     "/add",
     validationAddUpdateAirdropUser,
@@ -136,15 +146,6 @@ airdropRouter.post(
 //     isCreated: boolean,
 //     isUpdated: boolean,
 // }
-
-// ?wallet=string?xUsername=string?xPostLink=string
-airdropRouter.get("/user", dropController.getAirdropUser);
-// {
-//    wallet: string,
-//    xUsername: string,
-//    xPostLink: string,
-// }
-
 
 //--------------------presale--------------------
 
