@@ -1,4 +1,3 @@
-import { error } from "console";
 import * as common from "../common.js";
 import userAirdropService from "../services/airdropuser-service.js";
 import userPresaleService from "../services/presaleuser-service.js";
