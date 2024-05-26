@@ -8,10 +8,10 @@ const MAX_AIRDROP_USERS = parseInt(process.env.MAX_AIRDROP_USERS, 10) || 1000;
 const MAX_PRESALE_USERS = parseInt(process.env.MAX_PRESALE_USERS, 10) || 1000;
 const PRESALE_MIN_SOL_AMOUNT = parseFloat(process.env.PRESALE_MIN_SOL_AMOUNT) || 0;
 const PRESALE_MAX_SOL_AMOUNT = parseFloat(process.env.PRESALE_MAX_SOL_AMOUNT) || 0;
-const DEADLINE_TIME = parseInt(process.env.DEADLINE_TIME, 10) || 0;
+const DEADLINE_PRESALE = parseInt(process.env.DEADLINE_PRESALE, 10) || 0;
+const DEADLINE_AIRDROP = parseInt(process.env.DEADLINE_AIRDROP, 10) || 0;
 const DROP_PUBKEY = process.env.DROP_PUBKEY || "7faQb7SQxswoQyRY47iyYtff6iDG1bt7jSFsUm1cxUp9";
 const TWITTER_USER = process.env.TWITTER_USER || "";
-const TG_GROUP = process.env.TG_GROUP || "";
 const PRESALE_TOKENS = parseInt(process.env.PRESALE_TOKENS, 10) || 0;
 const TOKEN_TICKER = process.env.TOKEN_TICKER || "";
 const AIRDROP_TOKENS = parseInt(process.env.AIRDROP_TOKENS, 10) || 0;
@@ -42,8 +42,8 @@ class UserController {
             }
             //DO NOT REGISTER PEOPLE AFTER DEADLINE
             const time = Date.now() / 1000;
-            if (time > DEADLINE_TIME) {
-                common.log(`Deadline is reached: ${DEADLINE_TIME}`);
+            if (time > DEADLINE_PRESALE) {
+                common.log(`Deadline is reached: ${DEADLINE_PRESALE}`);
                 return res.status(403).json({
                     errorMsg: "You cannot register after deadline.",
                 });
@@ -104,8 +104,8 @@ class UserController {
             }
             //DO NOT REGISTER/UPDATE PEOPLE AFTER DEADLINE
             const time = Date.now() / 1000;
-            if (time > DEADLINE_TIME) {
-                common.log(`Deadline is reached: ${DEADLINE_TIME}`);
+            if (time > DEADLINE_AIRDROP) {
+                common.log(`Deadline is reached: ${DEADLINE_AIRDROP}`);
                 return res.status(403).json({
                     errorMsg: "You cannot register after deadline.",
                 });
@@ -141,31 +141,43 @@ class UserController {
         }
     }
 
-    async getDropInfo(req: any, res: any, next: any) {
+    async getPresaleInfo(req: any, res: any, next: any) {
         try {
 
-            const numberOfAirdrops = await userAirdropService.getNumberOfUsers();
             const numberOfPresales = await userPresaleService.getNumberOfUsers();
             const totalSolAmount = await userPresaleService.getTotalSolAmout();
-            common.log(`GetDropInfo - Airdrops: ${numberOfAirdrops}, Presales: ${numberOfPresales}, Total SOL: ${totalSolAmount}`);
+            common.log(`GetPresaleInfo - Presales: ${numberOfPresales}, Total SOL: ${totalSolAmount}`);
 
             return res.status(200).json({
-                numberOfAirdropUsers: numberOfAirdrops,
                 numberOfPresaleUsers: numberOfPresales,
-                numberOfMaxAirdropUsers: MAX_AIRDROP_USERS,
                 numberOfMaxPresaleUsers: MAX_PRESALE_USERS,
                 presaleMaxSolAmount: PRESALE_MAX_SOL_AMOUNT,
                 presaleMinSolAmount: PRESALE_MIN_SOL_AMOUNT,
-                airdropTokenAmount: AIRDROP_TOKENS,
                 presaleTokenAmount: PRESALE_TOKENS,
-                toXFollow: TWITTER_USER,
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
-                toTGFollow: TG_GROUP,
+                deadline: DEADLINE_PRESALE,
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getAirdropInfo(req: any, res: any, next: any) {
+        try {
+
+            const numberOfAirdrops = await userAirdropService.getNumberOfUsers();
+            common.log(`GetAirdropInfo - Airdrops: ${numberOfAirdrops}`);
+
+            return res.status(200).json({
+                numberOfAirdropUsers: numberOfAirdrops,
+                numberOfMaxAirdropUsers: MAX_AIRDROP_USERS,
+                airdropTokenAmount: AIRDROP_TOKENS,
+                toXFollow: TWITTER_USER,
                 xFollowers: TWITTER_FOLLOWERS,
                 xAge: TWITTER_AGE,
                 tokenTicker: TOKEN_TICKER,
-                deadline: DEADLINE_TIME,
+                deadline: DEADLINE_AIRDROP,
             });
         } catch (e) {
             next(e);

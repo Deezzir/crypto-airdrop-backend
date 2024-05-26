@@ -82,24 +82,31 @@ const validationAddUpdatePresaleUser = (req: any, res: any, next: any) => {
 //--------------------drop--------------------
 
 // nothing
-dropRouter.get("/details", dropController.getDropInfo);
+dropRouter.get("/airdrop", dropController.getAirdropInfo);
 //{ 
 //    numberOfAirdropUsers: number,
-//    numberOfPresaleUsers: number,
 //    numberOfMaxAirdropUsers: number,
-//    numberOfMaxPresaleUsers: number,
-//    presaleMinSolAmount: number,
-//    presaleMaxSolAmount: number,
-//    presaleTokenAmount: number,
 //    airdropTokenAmount: number,
-//    presaleSolAmount: number,
-//    dropPublicKey: string,
 //    tokenTicker: string,
 //    deadline: string,
 //    toXFollow: string;
 //    xFollowers: number;
 //    xAge: number;
 //    toTGFollow: string
+//}
+
+// nothing
+dropRouter.get("/presale", dropController.getPresaleInfo);
+//{ 
+//    numberOfPresaleUsers: number,
+//    numberOfMaxPresaleUsers: number,
+//    presaleMinSolAmount: number,
+//    presaleMaxSolAmount: number,
+//    presaleTokenAmount: number,
+//    presaleSolAmount: number,
+//    dropPublicKey: string,
+//    tokenTicker: string,
+//    deadline: string,
 //}
 
 // {
