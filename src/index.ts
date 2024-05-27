@@ -61,9 +61,9 @@ app.use("/check", checkRouter);
 app.use(ErrorMiddleware);
 app.use(RateLimiterMiddleware);
 app.use(XApiMiddleware);
+app.use(cors(corsOptions));
 app.use(
     '/drop',
-    cors(corsOptions),
     cookieParser(),
     bodyParser.json(),
     dropRouter,
