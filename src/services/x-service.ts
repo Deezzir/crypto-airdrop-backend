@@ -78,7 +78,7 @@ class XService {
             if (user.follower_count < TWITTER_FOLLOWERS || common.getAgeInDays(user.creation_date) < TWITTER_AGE)
                 return {
                     isValid: false,
-                    errorMsg: `Account must be Blue verified. Or have at least ${TWITTER_FOLLOWERS} followers and be at least ${TWITTER_AGE} days old`,
+                    errorMsg: `Account must be Blue verified. Or have ${TWITTER_FOLLOWERS}+ followers and be at least ${TWITTER_AGE} days old`,
                 };
         }
 
