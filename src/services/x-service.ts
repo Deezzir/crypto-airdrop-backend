@@ -7,6 +7,8 @@ dotenv.config();
 const TO_FOLLOW_USER = process.env.TWITTER_USER;
 const TOKEN_TICKER = process.env.TOKEN_TICKER;
 const TO_FOLLOW_ID = process.env.TWITTER_USER_ID;
+const TWITTER_FOLLOWERS = parseInt(process.env.TWITTER_FOLLOWERS, 10) || 30;
+const TWITTER_AGE = parseInt(process.env.TWITTER_AGE, 10) || 60;
 const NEXT_FOLLOWING_TOKEN_REGEX = /^0\|[0-9]+$/;
 
 function parseXUrl(url: string): { type: 'post', id: string, user: string } | null {
@@ -73,7 +75,7 @@ class XService {
         if (user.is_private !== null) return { isValid: false, errorMsg: 'Account cannot be private' };
 
         if (!user.is_blue_verified) {
-            if (user.follower_count < 30 || common.getAgeInDays(user.creation_date) < 60)
+            if (user.follower_count < TWITTER_FOLLOWERS || common.getAgeInDays(user.creation_date) < TWITTER_AGE)
                 return {
                     isValid: false,
                     errorMsg: 'Account must be Blue verified. Or have at least 30 followers and be at least 60 days old',
