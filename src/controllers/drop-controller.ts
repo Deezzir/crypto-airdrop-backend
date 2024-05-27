@@ -154,6 +154,7 @@ class UserController {
                 presaleMaxSolAmount: PRESALE_MAX_SOL_AMOUNT,
                 presaleMinSolAmount: PRESALE_MIN_SOL_AMOUNT,
                 presaleTokenAmount: PRESALE_TOKENS,
+                tokenTicker: TOKEN_TICKER,
                 dropPublicKey: DROP_PUBKEY,
                 presaleSolAmount: totalSolAmount,
                 deadline: DEADLINE_PRESALE,
