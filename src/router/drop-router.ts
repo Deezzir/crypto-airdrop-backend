@@ -1,6 +1,6 @@
-import { Router } from "express";
-import dropController from "../controllers/drop-controller.js";
-import * as common from "../common.js";
+import { Router } from 'express';
+import dropController from '../controllers/drop-controller.js';
+import * as common from '../common.js';
 import queue from 'express-queue';
 
 const dropRouter = Router();
@@ -8,82 +8,82 @@ const presaleRouter = Router();
 const airdropRouter = Router();
 
 const validationAddUpdateAirdropUser = (req: any, res: any, next: any) => {
-    const { user } = req.body;
+  const { user } = req.body;
 
-    if (!user) {
-        return res.status(400).json({
-            errorMsg: "No user provided",
-        });
-    }
+  if (!user) {
+    return res.status(400).json({
+      errorMsg: 'No user provided',
+    });
+  }
 
-    if (!user.wallet || !common.checkWallet(user.wallet)) {
-        return res.status(400).json({
-            errorMsg: "No wallet provided",
-        });
-    }
+  if (!user.wallet || !common.checkWallet(user.wallet)) {
+    return res.status(400).json({
+      errorMsg: 'No wallet provided',
+    });
+  }
 
-    // if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
-    //     return res.status(400).json({
-    //         errorMsg: "Invalid telegram username",
-    //     });
-    // }
+  // if (!user.tgUsername || !common.TG_USER_REGEX.test(user.tgUsername)) {
+  //     return res.status(400).json({
+  //         errorMsg: "Invalid telegram username",
+  //     });
+  // }
 
-    if (!user.xUsername || !common.X_USER_REGEX.test(user.xUsername)) {
-        return res.status(400).json({
-            errorMsg: "Invalid twitter username",
-        });
-    }
+  if (!user.xUsername || !common.X_USER_REGEX.test(user.xUsername)) {
+    return res.status(400).json({
+      errorMsg: 'Invalid twitter username',
+    });
+  }
 
-    if (!user.xPostLink || !common.X_POST_REGEX.test(user.xPostLink)) {
-        return res.status(400).json({
-            errorMsg: "Invalid twitter link",
-        });
-    }
+  if (!user.xPostLink || !common.X_POST_REGEX.test(user.xPostLink)) {
+    return res.status(400).json({
+      errorMsg: 'Invalid twitter link',
+    });
+  }
 
-    next();
+  next();
 };
 
 const validationCheckUserByWallet = (req: any, res: any, next: any) => {
-    const { wallet } = req.body;
+  const { wallet } = req.body;
 
-    if (!wallet || !common.checkWallet(wallet)) {
-        return res.status(400).json({
-            errorMsg: "Invalid wallet",
-        });
-    }
+  if (!wallet || !common.checkWallet(wallet)) {
+    return res.status(400).json({
+      errorMsg: 'Invalid wallet',
+    });
+  }
 
-    next();
+  next();
 };
 
 const validationAddUpdatePresaleUser = (req: any, res: any, next: any) => {
-    const { user } = req.body;
+  const { user } = req.body;
 
-    if (!user) {
-        return res.status(400).json({
-            errorMsg: "No user provided",
-        });
-    }
+  if (!user) {
+    return res.status(400).json({
+      errorMsg: 'No user provided',
+    });
+  }
 
-    if (!user.wallet || !common.checkWallet(user.wallet)) {
-        return res.status(400).json({
-            errorMsg: "No wallet provided",
-        });
-    }
+  if (!user.wallet || !common.checkWallet(user.wallet)) {
+    return res.status(400).json({
+      errorMsg: 'No wallet provided',
+    });
+  }
 
-    if (!user.solAmount || !common.checkSolAmount(user.solAmount)) {
-        return res.status(400).json({
-            errorMsg: "Invalid sol amount",
-        });
-    }
+  if (!user.solAmount || !common.checkSolAmount(user.solAmount)) {
+    return res.status(400).json({
+      errorMsg: 'Invalid sol amount',
+    });
+  }
 
-    next();
-}
+  next();
+};
 
 //--------------------drop--------------------
 
 // nothing
-dropRouter.get("/airdrop", dropController.getAirdropInfo);
-//{ 
+dropRouter.get('/airdrop', dropController.getAirdropInfo);
+//{
 //    numberOfAirdropUsers: number,
 //    numberOfMaxAirdropUsers: number,
 //    airdropTokenAmount: number,
@@ -96,8 +96,8 @@ dropRouter.get("/airdrop", dropController.getAirdropInfo);
 //}
 
 // nothing
-dropRouter.get("/presale", dropController.getPresaleInfo);
-//{ 
+dropRouter.get('/presale', dropController.getPresaleInfo);
+//{
 //    numberOfPresaleUsers: number,
 //    numberOfMaxPresaleUsers: number,
 //    presaleMinSolAmount: number,
@@ -113,9 +113,9 @@ dropRouter.get("/presale", dropController.getPresaleInfo);
 //         wallet: string,
 // }
 dropRouter.post(
-    "/check",
-    validationCheckUserByWallet,
-    dropController.checkUserByWallet
+  '/check',
+  validationCheckUserByWallet,
+  dropController.checkUserByWallet,
 );
 // {
 //     isValidWallet: boolean
@@ -128,7 +128,7 @@ dropRouter.post(
 //--------------------airdrop--------------------
 
 // ?wallet=string?xUsername=string?xPostLink=string
-airdropRouter.get("/user", dropController.getAirdropUser);
+airdropRouter.get('/user', dropController.getAirdropUser);
 // {
 //    wallet: string,
 //    xUsername: string,
@@ -143,11 +143,11 @@ airdropRouter.get("/user", dropController.getAirdropUser);
 //         tgUsername: string,
 //     }
 // }
-airdropRouter.use(queue({ activeLimit: 3, queuedLimit: -1 }));
 airdropRouter.post(
-    "/add",
-    validationAddUpdateAirdropUser,
-    dropController.addUpdateAidropUser
+  '/add',
+  queue({ activeLimit: 3, queuedLimit: -1 }),
+  validationAddUpdateAirdropUser,
+  dropController.addUpdateAidropUser,
 );
 // {
 //     isCreated: boolean,
@@ -164,9 +164,9 @@ airdropRouter.post(
 //     }
 // }
 presaleRouter.post(
-    "/add",
-    validationAddUpdatePresaleUser,
-    dropController.addUpdatePresaleUser
+  '/add',
+  validationAddUpdatePresaleUser,
+  dropController.addUpdatePresaleUser,
 );
 // {
 //     isCreated: boolean,
@@ -174,7 +174,7 @@ presaleRouter.post(
 // }
 
 // ?wallet=string
-presaleRouter.get("/user", dropController.getPresaleUser);
+presaleRouter.get('/user', dropController.getPresaleUser);
 // {
 //     wallet: string,
 //     solAmount: number,
@@ -183,7 +183,7 @@ presaleRouter.get("/user", dropController.getPresaleUser);
 
 // ----------------------------------------------
 
-dropRouter.use("/presale", presaleRouter);
-dropRouter.use("/airdrop", airdropRouter);
+dropRouter.use('/presale', presaleRouter);
+dropRouter.use('/airdrop', airdropRouter);
 
 export default dropRouter;
