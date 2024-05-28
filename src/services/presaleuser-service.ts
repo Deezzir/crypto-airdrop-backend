@@ -1,5 +1,5 @@
 import PresaleUserModel from "../models/presaleUser.js";
-import { PresaleUser } from "../common.js";
+import { PresaleUser, sleep } from "../common.js";
 import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import dotenv from "dotenv";
 dotenv.config();
@@ -66,29 +66,38 @@ class PresaleUserService {
     }
 
     async verifySignature(signature: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
-        const { value: status } = await RPC_URL.getSignatureStatus(signature);
+        while (true) {
+            const { value: status } = await RPC_URL.getSignatureStatus(signature);
 
-        if (status && ((status.confirmationStatus === 'confirmed' || status.confirmationStatus === 'finalized')) && status.err === null) {
-            const details = await RPC_URL.getTransaction("3uVuXFfFTqQw5jRi8Cpvpa6Jt578ASVYMnDrE3xFAdf4voStYbfMU7rq8sc8JmwfadVAXJUeNZ1M2o4iSVzdnJ1u", {
-                commitment: 'confirmed',
-                maxSupportedTransactionVersion: 0
-            });
+            console.log(JSON.stringify(status, null, 2));
 
-            const balance_change = (details?.meta?.postBalances[1] ?? 0) - (details?.meta?.preBalances[1] ?? 0) / LAMPORTS_PER_SOL;
-            const receiver = details?.transaction.message.getAccountKeys().get(1)?.toString() ?? '';
-
-            if (receiver !== DROP_PUBKEY) {
-                return { isValid: false, errorMsg: 'Invalid receiver' };
+            if (!status || (status && ((status.confirmationStatus === 'processed' || status.confirmationStatus === 'confirmed')) && status.err === null)) {
+                await sleep(1000);
+                continue;
             }
 
-            if (balance_change < (PRESALE_MIN_SOL_AMOUNT - 0.0001) || balance_change > (PRESALE_MAX_SOL_AMOUNT + 0.0001)) {
-                return { isValid: false, errorMsg: 'Invalid amount' };
+            if (status && status.confirmationStatus === 'finalized' && status.err === null) {
+                const details = await RPC_URL.getTransaction(signature, {
+                    commitment: 'confirmed',
+                    maxSupportedTransactionVersion: 0
+                });
+
+                const balance_change = ((details?.meta?.postBalances[1] ?? 0) - (details?.meta?.preBalances[1] ?? 0)) / LAMPORTS_PER_SOL;
+                const receiver = details?.transaction.message.getAccountKeys().get(1)?.toString() ?? '';
+
+                if (receiver !== DROP_PUBKEY) {
+                    return { isValid: false, errorMsg: 'Invalid receiver' };
+                }
+
+                if (balance_change < (PRESALE_MIN_SOL_AMOUNT - 0.0001) || balance_change > (PRESALE_MAX_SOL_AMOUNT + 0.0001)) {
+                    return { isValid: false, errorMsg: 'Invalid amount' };
+                }
+
+                return { isValid: true, errorMsg: undefined };
             }
 
-            return { isValid: true, errorMsg: undefined };
+            return { isValid: false, errorMsg: 'Transaction failed' }
         }
-
-        return { isValid: false, errorMsg: 'Transaction failed' }
     }
 }
 
