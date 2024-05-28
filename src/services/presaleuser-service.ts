@@ -13,7 +13,6 @@ class PresaleUserService {
     async verify(user: PresaleUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
         const isValidTx = await this.verifySignature(user.txEnroll);
         if (!isValidTx.isValid) {
-            log(`Invalid tx: ${isValidTx.errorMsg}`);
             return isValidTx;
         }
 
@@ -76,7 +75,6 @@ class PresaleUserService {
             attempts++;
             try {
                 const { value: status } = await RPC_URL.getSignatureStatus(signature);
-                log(`Attempt ${attempts}: ${JSON.stringify(status, null, 2)}`);
 
                 if (!status) {
                     await sleep(2000);
