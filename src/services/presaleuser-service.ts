@@ -75,7 +75,7 @@ class PresaleUserService {
                 const { value: status } = await RPC_URL.getSignatureStatus(signature);
 
                 if (!status) {
-                    await sleep(1000);
+                    await sleep(2000);
                     continue;
                 }
 
