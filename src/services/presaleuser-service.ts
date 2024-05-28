@@ -76,6 +76,7 @@ class PresaleUserService {
             attempts++;
             try {
                 const { value: status } = await RPC_URL.getSignatureStatus(signature);
+                log(`Attempt ${attempts}: ${JSON.stringify(status, null, 2)}`);
 
                 if (!status) {
                     await sleep(2000);
