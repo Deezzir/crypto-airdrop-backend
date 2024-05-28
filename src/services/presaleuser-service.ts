@@ -1,5 +1,5 @@
 import PresaleUserModel from "../models/presaleUser.js";
-import { PresaleUser, sleep } from "../common.js";
+import { PresaleUser, sleep, log } from "../common.js";
 import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import dotenv from "dotenv";
 dotenv.config();
@@ -12,7 +12,10 @@ const DROP_PUBKEY = process.env.DROP_PUBKEY || '';
 class PresaleUserService {
     async verify(user: PresaleUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
         const isValidTx = await this.verifySignature(user.txEnroll);
-        if (!isValidTx.isValid) return isValidTx;
+        if (!isValidTx.isValid) {
+            log(`Invalid tx: ${isValidTx.errorMsg}`);
+            return isValidTx;
+        }
 
         const record = await this.getUserByWallet(user.wallet);
         if (!record) return { isValid: true, errorMsg: undefined };
