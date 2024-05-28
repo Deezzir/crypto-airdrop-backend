@@ -13,6 +13,7 @@ class PresaleUserService {
     async verify(user: PresaleUser): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
         const isValidTx = await this.verifySignature(user.txEnroll);
         if (!isValidTx.isValid) {
+            log(`Invalid tx: ${isValidTx.errorMsg}`);
             return isValidTx;
         }
 
