@@ -66,39 +66,55 @@ class PresaleUserService {
     }
 
     async verifySignature(signature: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
-        while (true) {
-            const { value: status } = await RPC_URL.getSignatureStatus(signature);
+        const maxAttempts = 10;
+        let attempts = 0;
 
-            console.log(JSON.stringify(status, null, 2));
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                const { value: status } = await RPC_URL.getSignatureStatus(signature);
 
-            if (!status || (status && ((status.confirmationStatus === 'processed' || status.confirmationStatus === 'confirmed')) && status.err === null)) {
-                await sleep(1000);
-                continue;
-            }
-
-            if (status && status.confirmationStatus === 'finalized' && status.err === null) {
-                const details = await RPC_URL.getTransaction(signature, {
-                    commitment: 'confirmed',
-                    maxSupportedTransactionVersion: 0
-                });
-
-                const balance_change = ((details?.meta?.postBalances[1] ?? 0) - (details?.meta?.preBalances[1] ?? 0)) / LAMPORTS_PER_SOL;
-                const receiver = details?.transaction.message.getAccountKeys().get(1)?.toString() ?? '';
-
-                if (receiver !== DROP_PUBKEY) {
-                    return { isValid: false, errorMsg: 'Invalid receiver' };
+                if (!status) {
+                    await sleep(1000);
+                    continue;
                 }
 
-                if (balance_change < (PRESALE_MIN_SOL_AMOUNT - 0.0001) || balance_change > (PRESALE_MAX_SOL_AMOUNT + 0.0001)) {
-                    return { isValid: false, errorMsg: 'Invalid amount' };
+                const { confirmationStatus, err } = status;
+
+                if ((confirmationStatus === 'processed' || confirmationStatus === 'confirmed') && err === null) {
+                    await sleep(1000);
+                    continue;
                 }
 
-                return { isValid: true, errorMsg: undefined };
-            }
+                if (confirmationStatus === 'finalized' && err === null) {
+                    const details = await RPC_URL.getTransaction(signature, {
+                        commitment: 'confirmed',
+                        maxSupportedTransactionVersion: 0
+                    });
 
-            return { isValid: false, errorMsg: 'Transaction failed' }
+                    const balanceChange = ((details?.meta?.postBalances[1] ?? 0) - (details?.meta?.preBalances[1] ?? 0)) / LAMPORTS_PER_SOL;
+                    const receiver = details?.transaction.message.getAccountKeys().get(1)?.toString() ?? '';
+
+                    if (receiver !== DROP_PUBKEY) {
+                        return { isValid: false, errorMsg: 'Invalid receiver' };
+                    }
+
+                    if (balanceChange < (PRESALE_MIN_SOL_AMOUNT - 0.0001) || balanceChange > (PRESALE_MAX_SOL_AMOUNT + 0.0001)) {
+                        return { isValid: false, errorMsg: 'Invalid amount' };
+                    }
+
+                    return { isValid: true, errorMsg: undefined };
+                }
+
+                return { isValid: false, errorMsg: 'Transaction failed' };
+            } catch (error) {
+                return { isValid: false, errorMsg: `Error occured during tx verification. Contact dev` };
+            }
         }
+
+        return { isValid: false, errorMsg: 'Max attempts to verify the tx reached. Contact dev' };
     }
+
 }
 
 export default new PresaleUserService();
