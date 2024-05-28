@@ -69,7 +69,7 @@ class PresaleUserService {
     }
 
     async verifySignature(signature: string): Promise<{ isValid: boolean, errorMsg: string | undefined }> {
-        const maxAttempts = 10;
+        const maxAttempts = 40;
         let attempts = 0;
 
         while (attempts < maxAttempts) {
